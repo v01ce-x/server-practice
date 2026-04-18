@@ -22,10 +22,9 @@ class View
     private function getRoot(): string
     {
         global $app;
-        $root = $app->settings->getRootPath();
         $path = $app->settings->getViewsPath();
 
-        return $_SERVER['DOCUMENT_ROOT'] . $root . $path;
+        return dirname($_SERVER['DOCUMENT_ROOT']) . $path;
     }
 
     //Путь до основного файла с шаблоном сайта
@@ -56,8 +55,10 @@ class View
             //Помещаем буфер в переменную и очищаем его
             $content = ob_get_clean();
 
-            //Возвращаем собранную страницу
-            return require($this->getPathToMain());
+            //Собираем основной шаблон в строку и возвращаем результат
+            ob_start();
+            require $this->getPathToMain();
+            return ob_get_clean();
         }
         throw new Exception('Error render');
     }

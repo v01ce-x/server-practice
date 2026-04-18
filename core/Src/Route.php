@@ -42,6 +42,6 @@ class Route
         }
 
 
-        call_user_func([new $class, $action]);
+        echo call_user_func([new $class, $action]);
     }
 }
