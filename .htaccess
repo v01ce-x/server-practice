@@ -1,0 +1,4 @@
+<IfModule mod_rewirte.c>
+    RewriteEngine on
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
