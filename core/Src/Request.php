@@ -22,14 +22,24 @@ class Request
         return $this->body + $this->files();
     }
 
+    public function isMethod(string $method): bool
+    {
+        return strtoupper($this->method) === strtoupper($method);
+    }
+
     public function set($field, $value):void
     {
         $this->body[$field] = $value;
     }
 
-    public function get($field)
+    public function get($field, $default = null)
     {
-        return $this->body[$field];
+        return $this->body[$field] ?? $default;
+    }
+
+    public function has(string $field): bool
+    {
+        return array_key_exists($field, $this->body) && $this->body[$field] !== '';
     }
 
     public function files(): array

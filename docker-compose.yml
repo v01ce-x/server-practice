@@ -13,11 +13,22 @@ services:
       - APACHE_RUN_USER=${USER:-user}
       - APACHE_RUN_GROUP=${USER:-user}
       - LC_CDPATH=/var/www/html
+      - DB_DRIVER=${DB_DRIVER:-mysql}
+      - DB_HOST=${DB_HOST:-db}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_DATABASE=${DB_DATABASE:-db}
+      - DB_USERNAME=${DB_USERNAME:-user}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - APP_DB_USERNAME=${APP_DB_USERNAME:-}
+      - APP_DB_PASSWORD=${APP_DB_PASSWORD:-}
+      - DB_AUTO_SETUP=${DB_AUTO_SETUP:-1}
     restart: unless-stopped
     volumes:
       - ./:/var/www/html
     ports:
       - ${WEB_PORT:-8080}:80
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - db
   
@@ -25,10 +36,10 @@ services:
     image: mariadb:10.7
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: ${DB_NAME:-db}
-      MYSQL_ROOT_PASSWORD: ${USER_DB_PASSWORD:-QWEasd123!}
-      MYSQL_USER: ${USER:-user}
-      MYSQL_PASSWORD: ${PASSWORD:-password}
+      MYSQL_DATABASE: ${DB_DATABASE:-db}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-QWEasd123!}
+      MYSQL_USER: ${DB_USERNAME:-user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
     volumes:
       - db-dev:/var/lib/mysql
 
@@ -38,6 +49,11 @@ services:
     ports:
       - ${WEB_PORT_PHPMYADMIN:-8081}:80
     environment:
-      - PMA_HOST=db
+      - PMA_HOST=${DB_HOST:-db}
+      - PMA_PORT=${DB_PORT:-3306}
+      - PMA_USER=${APP_DB_USERNAME:-${DB_USERNAME:-user}}
+      - PMA_PASSWORD=${APP_DB_PASSWORD:-${DB_PASSWORD:-password}}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - db

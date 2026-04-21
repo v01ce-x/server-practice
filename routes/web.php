@@ -2,10 +2,33 @@
 
 use Src\Route;
 
-Route::add('GET', '/', [Controller\Site::class, 'hello'])
+Route::add('GET', '/', [Controller\Auth::class, 'home']);
+
+Route::add(['GET', 'POST'], '/login', [Controller\Auth::class, 'login'])
+    ->middleware('guest');
+Route::add('GET', '/logout', [Controller\Auth::class, 'logout'])
     ->middleware('auth');
-Route::add('GET', '/hello', [Controller\Site::class, 'hello'])
-    ->middleware('auth');
-Route::add(['GET', 'POST'], '/signup', [Controller\Site::class, 'signup']);
-Route::add(['GET', 'POST'], '/login', [Controller\Site::class, 'login']);
-Route::add('GET', '/logout', [Controller\Site::class, 'logout']);
+
+Route::add('GET', '/dashboard', [Controller\Dashboard::class, 'index'])
+    ->middleware('auth', 'role:system_admin,administrator');
+
+Route::add(['GET', 'POST'], '/subscribers', [Controller\Subscriber::class, 'index'])
+    ->middleware('auth', 'role:system_admin');
+Route::add(['GET', 'POST'], '/subscribers/{id:\d+}', [Controller\Subscriber::class, 'show'])
+    ->middleware('auth', 'role:system_admin');
+
+Route::add(['GET', 'POST'], '/phones', [Controller\Phone::class, 'index'])
+    ->middleware('auth', 'role:system_admin');
+Route::add(['GET', 'POST'], '/phones/assign/{id:\d+}', [Controller\Phone::class, 'assign'])
+    ->middleware('auth', 'role:system_admin');
+
+Route::add(['GET', 'POST'], '/directories', [Controller\Directory::class, 'index'])
+    ->middleware('auth', 'role:system_admin');
+
+Route::add('GET', '/reports/export', [Controller\Report::class, 'export'])
+    ->middleware('auth', 'role:system_admin');
+Route::add('GET', '/reports', [Controller\Report::class, 'index'])
+    ->middleware('auth', 'role:system_admin');
+
+Route::add(['GET', 'POST'], '/admins', [Controller\Admin::class, 'index'])
+    ->middleware('auth', 'role:administrator');
