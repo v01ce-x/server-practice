@@ -56,6 +56,7 @@ class Route
     public function redirect(string $url): void
     {
         header('Location: ' . $this->getUrl($url));
+        exit;
     }
 
     public function getUrl(string $url): string
@@ -97,7 +98,10 @@ class Route
                 $vars[] = Middleware::single()->runMiddlewares($httpMethod, $uri);
                 $class = $handler[0];
                 $action = $handler[1];
-                call_user_func([new $class, $action], ...$vars);
+                $response = call_user_func([new $class, $action], ...$vars);
+                if ($response !== null) {
+                    echo $response;
+                }
                 break;
         }
     }

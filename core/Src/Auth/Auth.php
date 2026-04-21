@@ -13,8 +13,12 @@ class Auth
     public static function init(IdentityInterface $user): void
     {
         self::$user = $user;
-        if (self::user()) {
-            self::login(self::user());
+
+        $currentUser = self::user();
+        if ($currentUser) {
+            self::$user = $currentUser;
+        } else {
+            Session::clear('id');
         }
     }
 
@@ -28,6 +32,10 @@ class Auth
     //Аутентификация пользователя и вход по учетным данным
     public static function attempt(array $credentials): bool
     {
+        if (!isset($credentials['login'], $credentials['password'])) {
+            return false;
+        }
+
         if ($user = self::$user->attemptIdentity($credentials)) {
             self::login($user);
             return true;
@@ -38,8 +46,12 @@ class Auth
     //Возврат текущего аутентифицированного пользователя
     public static function user()
     {
-        $id = Session::get('id') ?? 0;
-        return self::$user->findIdentity($id);
+        $id = Session::get('id');
+        if (empty($id)) {
+            return null;
+        }
+
+        return self::$user->findIdentity((int)$id);
     }
 
     //Проверка является ли текущий пользователь аутентифицированным

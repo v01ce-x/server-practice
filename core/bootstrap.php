@@ -13,7 +13,6 @@ function getConfigs(string $path = DIR_CONFIG): array
     return $settings;
 }
 
-require_once __DIR__ . '/../routes/web.php';
 $app = new Src\Application(new Src\Settings(getConfigs()));
 
 function app() {
@@ -21,4 +20,6 @@ function app() {
     return $app;
 }
 
-return new Src\Application(new Src\Settings(getConfigs()));
+require_once __DIR__ . '/../routes/web.php';
+
+return $app;

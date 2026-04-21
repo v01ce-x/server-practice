@@ -23,12 +23,14 @@ class Settings
 
     public function getRootPath(): string
     {
-        return $this->path['root'] ? '/' . $this->path['root'] : '';
+        $root = trim($this->path['root'] ?? '', '/');
+        return $root !== '' ? '/' . $root : '';
     }
 
     public function getViewsPath(): string
     {
-        return '/' . $this->path['views'] ?? '';
+        $views = trim($this->path['views'] ?? '', '/');
+        return $views !== '' ? '/' . $views : '';
     }
 
     public function getDbSetting(): array {

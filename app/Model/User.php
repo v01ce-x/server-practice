@@ -19,9 +19,8 @@ class User extends Model implements IdentityInterface
 
     protected static function booted()
     {
-        static::created(function ($user) {
+        static::creating(function ($user) {
             $user->password = md5($user->password);
-            $user->save();
         });
     }
 
@@ -40,6 +39,10 @@ class User extends Model implements IdentityInterface
     //Возврат аутентифицированного пользователя
     public function attemptIdentity(array $credentials)
     {
+        if (!isset($credentials['login'], $credentials['password'])) {
+            return null;
+        }
+
         return self::where(['login' => $credentials['login'],
             'password' => md5($credentials['password'])])->first();
     }
