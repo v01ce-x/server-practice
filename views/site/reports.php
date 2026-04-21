@@ -5,10 +5,6 @@ require_once __DIR__ . '/_helpers.php';
 <div class="telephony-page">
     <?php telephony_page_header('Отчёты', 'Количество абонентов по подразделениям и помещениям.', $query ?? ''); ?>
 
-    <div class="toolbar toolbar--end">
-        <a class="button-secondary" href="<?= e(url('/reports/export')) ?>">Экспорт CSV</a>
-    </div>
-
     <section class="metrics-grid metrics-grid--reports">
         <?php foreach (($summaryStats ?? []) as $item): ?>
             <article class="metric-card">

@@ -36,7 +36,6 @@ class Auth
                 'password' => (string)$request->get('password'),
                 'auth_role' => $authRole,
             ])) {
-                /** @var User $user */
                 $user = AuthService::user();
                 Session::flash('Добро пожаловать в систему внутренней телефонной связи.');
                 app()->route->redirect($user->isAdministrator() ? '/admins' : '/dashboard');

@@ -45,18 +45,6 @@ $switchLabel = $authRole === User::ROLE_SYSTEM_ADMIN ? 'Открыть режи�
                         <input class="field-control" id="password" name="password" type="password"
                                placeholder="••••••••••••">
                     </div>
-                    <div class="role-toggle">
-                        <label>
-                            <input type="radio" name="auth_role" value="<?= e(User::ROLE_SYSTEM_ADMIN) ?>"
-                                   <?= $authRole === User::ROLE_SYSTEM_ADMIN ? 'checked' : '' ?>>
-                            <span>Системный администратор</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="auth_role" value="<?= e(User::ROLE_ADMINISTRATOR) ?>"
-                                   <?= $authRole === User::ROLE_ADMINISTRATOR ? 'checked' : '' ?>>
-                            <span>Администратор системы</span>
-                        </label>
-                    </div>
                     <div class="inline-actions">
                         <button class="button" type="submit">Войти в рабочее пространство</button>
                         <a class="button-secondary" href="<?= e(url('/login?auth_role=' . $switchRole)) ?>"><?= e($switchLabel) ?></a>
