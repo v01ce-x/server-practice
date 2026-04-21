@@ -50,7 +50,7 @@ $primaryNumber = $subscriber->phone?->number ?? '—';
                         <div class="field">
                             <label for="card-birth-date">Дата рождения</label>
                             <input class="field-control" id="card-birth-date" name="birth_date" type="text"
-                                   value="<?= e($formData['birth_date'] ?? '') ?>" placeholder="1990-12-31">
+                                   value="<?= e($formData['birth_date'] ?? '') ?>" placeholder="31.12.1990 или 1990-12-31">
                         </div>
                         <div class="field">
                             <label for="card-department">Подразделение</label>

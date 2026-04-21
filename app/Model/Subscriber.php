@@ -2,6 +2,7 @@
 
 namespace Model;
 
+use DateTimeImmutable;
 use Illuminate\Database\Eloquent\Model;
 
 class Subscriber extends Model
@@ -36,14 +37,14 @@ class Subscriber extends Model
         $this->attributes['patronymic'] = $value;
     }
 
-    public function getBirthDateAttribute(): string
+    public function getBirthdateAttribute($value): ?string
     {
-        return (string)$this->birthdate;
+        return self::normalizeBirthdateValue($value);
     }
 
-    public function setBirthDateAttribute(?string $value): void
+    public function setBirthdateAttribute($value): void
     {
-        $this->attributes['birthdate'] = $value;
+        $this->attributes['birthdate'] = self::normalizeBirthdateValue($value);
     }
 
     public function getDepartmentIdAttribute(): int
@@ -83,15 +84,43 @@ class Subscriber extends Model
 
     public function getBirthDateFormattedAttribute(): string
     {
-        if (!$this->birthdate) {
-            return '';
+        $birthdate = $this->birthdate;
+        if (!$birthdate) {
+            return 'Не указана';
         }
 
-        $chunks = explode('-', (string)$this->birthdate);
+        $chunks = explode('-', $birthdate);
         if (count($chunks) !== 3) {
-            return (string)$this->birthdate;
+            return $birthdate;
         }
 
         return sprintf('%s.%s.%s', $chunks[2], $chunks[1], $chunks[0]);
+    }
+
+    private static function normalizeBirthdateValue($value): ?string
+    {
+        $value = trim((string)$value);
+        if ($value === '' || $value === '0000-00-00' || $value === '00.00.0000') {
+            return null;
+        }
+
+        $formats = [
+            '!Y-m-d',
+            '!d.m.Y',
+            '!d-m-Y',
+            '!d/m/Y',
+            '!Y/m/d',
+        ];
+
+        foreach ($formats as $format) {
+            $date = DateTimeImmutable::createFromFormat($format, $value);
+            $errors = DateTimeImmutable::getLastErrors();
+
+            if ($date && ($errors === false || (($errors['warning_count'] ?? 0) === 0 && ($errors['error_count'] ?? 0) === 0))) {
+                return $date->format('Y-m-d');
+            }
+        }
+
+        return null;
     }
 }

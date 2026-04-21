@@ -76,7 +76,7 @@ $currentState = $stateFilter ?? 'all';
                         <div class="field">
                             <label for="subscriber-birth-date">Дата рождения</label>
                             <input class="field-control" id="subscriber-birth-date" name="birth_date" type="text"
-                                   value="<?= e($createData['birth_date'] ?? '') ?>" placeholder="1990-12-31">
+                                   value="<?= e($createData['birth_date'] ?? '') ?>" placeholder="31.12.1990 или 1990-12-31">
                         </div>
                         <div class="field">
                             <label for="subscriber-department">Подразделение</label>
@@ -111,7 +111,7 @@ $currentState = $stateFilter ?? 'all';
                     ?>
                     <article class="row-card row-card--subscribers">
                         <div class="row-card__title"><?= e($subscriber->full_name) ?></div>
-                        <div><?= e($subscriber->department?->name ?? 'Без подразделения') ?></div>
+                        <div><?= e($subscriber->department->name ?? 'Без подразделения') ?></div>
                         <div class="row-card__muted"><?= e($subscriber->birth_date_formatted) ?></div>
                         <div><?= e($primaryNumber) ?></div>
                         <a class="<?= $hasPhone ? 'button' : 'button-secondary' ?>"

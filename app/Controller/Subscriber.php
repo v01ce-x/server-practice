@@ -94,7 +94,7 @@ class Subscriber
             'last_name' => trim((string)$request->get('last_name', $subscriber->last_name)),
             'first_name' => trim((string)$request->get('first_name', $subscriber->first_name)),
             'middle_name' => trim((string)$request->get('middle_name', $subscriber->middle_name)),
-            'birth_date' => trim((string)$request->get('birth_date', $subscriber->birth_date)),
+            'birth_date' => trim((string)$request->get('birth_date', $subscriber->birthdate)),
             'department_id' => (string)$request->get('department_id', (string)$subscriber->department_id),
         ];
 
