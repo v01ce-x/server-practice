@@ -1,4 +1,6 @@
 <?php
+use Src\Security\Csrf;
+
 const DIR_CONFIG = '/../config';
 
 if (!function_exists('getConfigs')) {
@@ -36,6 +38,20 @@ if (!function_exists('e')) {
     function e($value): string
     {
         return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+if (!function_exists('csrf_token')) {
+    function csrf_token(): string
+    {
+        return Csrf::token();
+    }
+}
+
+if (!function_exists('csrf_field')) {
+    function csrf_field(): string
+    {
+        return Csrf::field();
     }
 }
 

@@ -16,15 +16,16 @@ require_once __DIR__ . '/_helpers.php';
             <div class="inline-form" style="margin-top: 20px;">
                 <?php telephony_messages($createErrors ?? []); ?>
                 <form method="post" class="inline-form">
+                    <?= csrf_field() ?>
                     <div class="field-grid">
                         <div class="field">
                             <label for="admin-login">Логин</label>
                             <input class="field-control" id="admin-login" name="login" type="text"
-                                   value="<?= e($createData['login'] ?? '') ?>" placeholder="sysadmin@company.local" required>
+                                   value="<?= e($createData['login'] ?? '') ?>" placeholder="sysadmin@company.local">
                         </div>
                         <div class="field">
                             <label for="admin-password">Пароль</label>
-                            <input class="field-control" id="admin-password" name="password" type="password" required>
+                            <input class="field-control" id="admin-password" name="password" type="password">
                         </div>
                     </div>
                     <div class="inline-actions">

@@ -2,6 +2,7 @@
 
 namespace Src\Auth;
 
+use Src\Security\Csrf;
 use Src\Session;
 
 class Auth
@@ -25,6 +26,8 @@ class Auth
     //Вход пользователя по модели
     public static function login(IdentityInterface $user): void
     {
+        Session::regenerate();
+        Csrf::refresh();
         self::$user = $user;
         Session::set('id', self::$user->getId());
     }
@@ -67,6 +70,8 @@ class Auth
     public static function logout(): bool
     {
         Session::clear('id');
+        Session::regenerate();
+        Csrf::refresh();
         return true;
     }
 

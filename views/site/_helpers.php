@@ -12,6 +12,19 @@ if (!function_exists('telephony_hidden_inputs')) {
     }
 }
 
+if (!function_exists('telephony_avatar')) {
+    function telephony_avatar(string $fallback, ?string $imageUrl = null, string $class = 'profile-card__avatar', string $alt = 'Аватар'): string
+    {
+        $fallback = trim($fallback) !== '' ? $fallback : '??';
+
+        if ($imageUrl !== null && trim($imageUrl) !== '') {
+            return '<span class="' . e($class) . ' is-image"><img class="avatar-image" src="' . e($imageUrl) . '" alt="' . e($alt) . '"></span>';
+        }
+
+        return '<span class="' . e($class) . '">' . e($fallback) . '</span>';
+    }
+}
+
 if (!function_exists('telephony_page_header')) {
     function telephony_page_header(string $title, string $subtitle, string $query = '', array $hidden = []): void
     {
@@ -69,6 +82,16 @@ if (!function_exists('telephony_initials')) {
         }
 
         return mb_strtoupper(implode('', array_slice($letters, 0, 2)));
+    }
+}
+
+if (!function_exists('telephony_logout_form')) {
+    function telephony_logout_form(string $action, string $class = 'sidebar__logout'): string
+    {
+        return '<form method="post" action="' . e($action) . '" class="sidebar__logout-form">'
+            . csrf_field()
+            . '<button class="' . e($class) . '" type="submit">Выйти</button>'
+            . '</form>';
     }
 }
 

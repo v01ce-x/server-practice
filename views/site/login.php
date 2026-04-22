@@ -33,22 +33,17 @@ if (!empty($message)) {
             <h2>Войти в систему</h2>
             <p>Выбери сценарий входа и продолжай работу.</p>
             <div class="auth-card__body">
-                <?php if (!empty($messages)): ?>
-                    <?php telephony_messages($messages, $messageType); ?>
-                <?php endif; ?>
-                <?php if (!empty($setupHint)): ?>
-                    <?php telephony_messages([$setupHint], 'success'); ?>
-                <?php endif; ?>
                 <form method="post" class="inline-form">
+                    <?= csrf_field() ?>
                     <div class="field">
                         <label for="login">Логин</label>
                         <input class="field-control" id="login" name="login" type="text"
-                               value="<?= e($formData['login'] ?? '') ?>" placeholder="sysadmin@company.local" required>
+                               value="<?= e($formData['login'] ?? '') ?>" placeholder="sysadmin@company.local">
                     </div>
                     <div class="field">
                         <label for="password">Пароль</label>
                         <input class="field-control" id="password" name="password" type="password"
-                               placeholder="••••••••••••" required>
+                               placeholder="••••••••••••">
                     </div>
                     <div class="inline-actions">
                         <button class="button" type="submit">Войти в рабочее пространство</button>

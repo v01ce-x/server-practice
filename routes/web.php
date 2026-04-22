@@ -6,11 +6,13 @@ Route::add('GET', '/', [Controller\Auth::class, 'home']);
 
 Route::add(['GET', 'POST'], '/login', [Controller\Auth::class, 'login'])
     ->middleware('guest');
-Route::add('GET', '/logout', [Controller\Auth::class, 'logout'])
+Route::add('POST', '/logout', [Controller\Auth::class, 'logout'])
     ->middleware('auth');
 
 Route::add('GET', '/dashboard', [Controller\Dashboard::class, 'index'])
     ->middleware('auth', 'role:system_admin,administrator');
+Route::add('POST', '/profile/avatar', [Controller\Dashboard::class, 'uploadAvatar'])
+    ->middleware('auth');
 
 Route::add(['GET', 'POST'], '/subscribers', [Controller\Subscriber::class, 'index'])
     ->middleware('auth', 'role:system_admin');

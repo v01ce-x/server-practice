@@ -6,13 +6,14 @@ use Model\Department;
 use Model\Room;
 use Model\Subscriber;
 use Src\Request;
+use Src\Security\Input;
 use Src\View;
 
 class Report
 {
     public function index(Request $request): string
     {
-        $queryText = trim((string)$request->get('q', ''));
+        $queryText = Input::search($request->get('q', ''));
         [$departmentStats, $roomStats] = $this->buildStats();
 
         if ($queryText !== '') {
@@ -57,14 +58,14 @@ class Report
         fputcsv($stream, ['Абоненты по подразделениям']);
         fputcsv($stream, ['Подразделение', 'Количество']);
         foreach ($departmentStats as $item) {
-            fputcsv($stream, [$item['name'], $item['count']]);
+            fputcsv($stream, [self::escapeCsvValue($item['name']), $item['count']]);
         }
 
         fputcsv($stream, []);
         fputcsv($stream, ['Абоненты по помещениям']);
         fputcsv($stream, ['Помещение', 'Количество']);
         foreach ($roomStats as $item) {
-            fputcsv($stream, [$item['name'], $item['count']]);
+            fputcsv($stream, [self::escapeCsvValue($item['name']), $item['count']]);
         }
 
         rewind($stream);
@@ -97,5 +98,14 @@ class Report
             ->all();
 
         return [$departmentStats, $roomStats];
+    }
+
+    private static function escapeCsvValue(string $value): string
+    {
+        $value = trim($value);
+
+        return preg_match('/^[=\-+@]/', $value) === 1
+            ? "'" . $value
+            : $value;
     }
 }

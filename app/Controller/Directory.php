@@ -8,9 +8,11 @@ use Model\Room;
 use Model\RoomType;
 use Model\User;
 use Src\Auth\Auth as AuthService;
-use Src\FormValidator;
 use Src\Request;
+use Src\Security\Input;
 use Src\Session;
+use Src\Validator\Forms\DepartmentFormValidator;
+use Src\Validator\Forms\RoomFormValidator;
 use Src\View;
 use Throwable;
 
@@ -18,31 +20,29 @@ class Directory
 {
     public function index(Request $request): string
     {
-        $queryText = trim((string)$request->get('q', ''));
-        $showDepartmentForm = $request->get('create') === 'department';
-        $showRoomForm = $request->get('create') === 'room';
+        $queryText = Input::search($request->get('q', ''));
+        $escapedQueryText = Input::escapeLike($queryText);
+        $createMode = Input::enum($request->get('create', ''), ['department', 'room'], '');
+        $showDepartmentForm = $createMode === 'department';
+        $showRoomForm = $createMode === 'room';
         $departmentErrors = [];
         $roomErrors = [];
 
         $departmentData = [
-            'name' => trim((string)$request->get('name', '')),
-            'type' => trim((string)$request->get('type', '')),
+            'name' => Input::text($request->get('name', ''), 120),
+            'type' => Input::text($request->get('type', ''), 80),
         ];
         $roomData = [
-            'name' => trim((string)$request->get('room_name', '')),
-            'type' => trim((string)$request->get('room_type', '')),
+            'name' => Input::text($request->get('room_name', ''), 120),
+            'type' => Input::text($request->get('room_type', ''), 80),
         ];
 
         if ($request->isMethod('POST') && $request->get('form') === 'create_department') {
             $showDepartmentForm = true;
-            $departmentErrors = (new FormValidator())
-                ->required('Название подразделения', $departmentData['name'])
-                ->required('Вид подразделения', $departmentData['type'])
-                ->errors();
+            $departmentErrors = (new DepartmentFormValidator($departmentData))->messages();
 
             if ($departmentErrors === []) {
                 try {
-                    /** @var User $user */
                     $user = AuthService::user();
                     $typeId = (int)DivisionType::query()->firstOrCreate([
                         'type_name' => $departmentData['type'],
@@ -63,10 +63,7 @@ class Directory
 
         if ($request->isMethod('POST') && $request->get('form') === 'create_room') {
             $showRoomForm = true;
-            $roomErrors = (new FormValidator())
-                ->required('Название или номер помещения', $roomData['name'])
-                ->required('Вид помещения', $roomData['type'])
-                ->errors();
+            $roomErrors = (new RoomFormValidator($roomData))->messages();
 
             if ($roomErrors === []) {
                 try {
@@ -91,15 +88,15 @@ class Directory
             'query' => $queryText,
             'departments' => Department::query()
                 ->with('typeRelation')
-                ->when($queryText !== '', function ($query) use ($queryText) {
-                    $query->where('name', 'like', "%{$queryText}%");
+                ->when($queryText !== '', function ($query) use ($escapedQueryText) {
+                    $query->where('name', 'like', "%{$escapedQueryText}%");
                 })
                 ->orderBy('name')
                 ->get(),
             'rooms' => Room::query()
                 ->with('typeRelation')
-                ->when($queryText !== '', function ($query) use ($queryText) {
-                    $query->where('name', 'like', "%{$queryText}%");
+                ->when($queryText !== '', function ($query) use ($escapedQueryText) {
+                    $query->where('name', 'like', "%{$escapedQueryText}%");
                 })
                 ->orderBy('name')
                 ->get(),

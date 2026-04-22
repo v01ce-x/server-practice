@@ -9,7 +9,11 @@ use Model\Subscriber;
 use Model\User;
 use Src\Auth\Auth as AuthService;
 use Src\Request;
+use Src\Security\AvatarUploader;
+use Src\Security\Input;
+use Src\Session;
 use Src\View;
+use Throwable;
 
 class Dashboard
 {
@@ -31,7 +35,8 @@ class Dashboard
 
         return new View('site.dashboard', [
             'activeMenu' => 'dashboard',
-            'query' => trim((string)$request->get('q', '')),
+            'query' => Input::search($request->get('q', '')),
+            'currentUser' => $user,
             'pageStats' => [
                 ['value' => Subscriber::query()->count(), 'label' => 'Абоненты'],
                 ['value' => Phone::query()->count(), 'label' => 'Номера'],
@@ -41,7 +46,7 @@ class Dashboard
             'quickActions' => $user->isAdministrator()
                 ? [
                     ['label' => 'Системные админы', 'url' => url('/admins'), 'primary' => true],
-                    ['label' => 'Выйти', 'url' => url('/logout')],
+                    ['label' => 'Выйти', 'url' => url('/logout'), 'method' => 'post'],
                 ]
                 : [
                     ['label' => 'Новый абонент', 'url' => url('/subscribers?create=1'), 'primary' => true],
@@ -63,5 +68,22 @@ class Dashboard
                 ];
             })->all(),
         ]);
+    }
+
+    public function uploadAvatar(Request $request): void
+    {
+        /** @var User $user */
+        $user = AuthService::user();
+
+        try {
+            $user->avatar_path = AvatarUploader::store($request->file('avatar'), $user->avatar_path);
+            $user->save();
+
+            Session::flash('Аватар обновлён.');
+        } catch (Throwable $exception) {
+            Session::flash($exception->getMessage(), 'error');
+        }
+
+        app()->route->redirect('/dashboard');
     }
 }

@@ -18,6 +18,7 @@ class User extends Model implements IdentityInterface
     protected $fillable = [
         'login',
         'password',
+        'avatar_path',
         'role_id',
     ];
 
@@ -119,6 +120,22 @@ class User extends Model implements IdentityInterface
     public function getStatusLabel(): string
     {
         return 'Активен';
+    }
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        $path = trim((string)$this->avatar_path);
+
+        return $path === '' ? null : url('/' . ltrim($path, '/'));
+    }
+
+    public function getAvatarFallback(): string
+    {
+        $base = strstr((string)$this->login, '@', true) ?: (string)$this->login;
+        $base = preg_replace('/[^\p{L}\p{N}]+/u', '', $base) ?? '';
+        $base = $base !== '' ? $base : (string)$this->login;
+
+        return mb_strtoupper(mb_substr($base, 0, 2));
     }
 
     public function getShortName(): string

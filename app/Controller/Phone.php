@@ -5,9 +5,10 @@ namespace Controller;
 use Model\Phone as PhoneModel;
 use Model\Room;
 use Model\Subscriber;
-use Src\FormValidator;
 use Src\Request;
+use Src\Security\Input;
 use Src\Session;
+use Src\Validator\Forms\PhoneFormValidator;
 use Src\View;
 use Throwable;
 
@@ -16,16 +17,16 @@ class Phone
     public function index(Request $request): string
     {
         $errors = [];
-        $showCreateForm = (bool)$request->get('create');
+        $showCreateForm = $request->get('create') === '1';
         $formData = [
-            'number' => trim((string)$request->get('number', '')),
-            'room_id' => (string)$request->get('room_id', ''),
-            'subscriber_id' => (string)$request->get('subscriber_id', ''),
+            'number' => Input::text($request->get('number', ''), 32),
+            'room_id' => Input::numericString($request->get('room_id', '')),
+            'subscriber_id' => Input::numericString($request->get('subscriber_id', '')),
         ];
 
         if ($request->isMethod('POST') && $request->get('form') === 'create_phone') {
             $showCreateForm = true;
-            $errors = $this->validatePhoneData($formData, true);
+            $errors = (new PhoneFormValidator($formData, true))->messages();
 
             if ($errors === []) {
                 try {
@@ -43,12 +44,13 @@ class Phone
             }
         }
 
-        $queryText = trim((string)$request->get('q', ''));
+        $queryText = Input::search($request->get('q', ''));
+        $escapedQueryText = Input::escapeLike($queryText);
 
         $phones = PhoneModel::query()
             ->with(['room', 'subscriber.department'])
-            ->when($queryText !== '', function ($query) use ($queryText) {
-                $query->where('phone_number', 'like', "%{$queryText}%");
+            ->when($queryText !== '', function ($query) use ($escapedQueryText) {
+                $query->where('phone_number', 'like', "%{$escapedQueryText}%");
             })
             ->orderBy('phone_number')
             ->get();
@@ -75,12 +77,12 @@ class Phone
         $errors = [];
         $currentPhone = $subscriber->phone;
         $formData = [
-            'number' => trim((string)$request->get('number', $currentPhone?->number ?? '')),
-            'room_id' => (string)$request->get('room_id', (string)($currentPhone?->room_id ?? '')),
+            'number' => Input::text($request->get('number', $currentPhone?->number ?? ''), 32),
+            'room_id' => Input::numericString($request->get('room_id', (string)($currentPhone?->room_id ?? ''))),
         ];
 
         if ($request->isMethod('POST')) {
-            $errors = $this->validatePhoneData($formData);
+            $errors = (new PhoneFormValidator($formData))->messages();
 
             if ($errors === []) {
                 try {
@@ -114,18 +116,5 @@ class Phone
             'formData' => $formData,
             'assignErrors' => $errors,
         ]);
-    }
-
-    private function validatePhoneData(array $formData, bool $withSubscriber = false): array
-    {
-        $validator = (new FormValidator())
-            ->required('Номер телефона', $formData['number'])
-            ->required('Помещение', $formData['room_id']);
-
-        if ($withSubscriber) {
-            $validator->required('Абонент', $formData['subscriber_id']);
-        }
-
-        return $validator->errors();
     }
 }

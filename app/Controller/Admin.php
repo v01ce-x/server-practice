@@ -4,9 +4,10 @@ namespace Controller;
 
 use Model\Role;
 use Model\User;
-use Src\FormValidator;
 use Src\Request;
+use Src\Security\Input;
 use Src\Session;
+use Src\Validator\Forms\CredentialsFormValidator;
 use Src\View;
 use Throwable;
 
@@ -14,21 +15,20 @@ class Admin
 {
     public function index(Request $request): string
     {
-        $queryText = trim((string)$request->get('q', ''));
+        $queryText = Input::search($request->get('q', ''));
+        $escapedQueryText = Input::escapeLike($queryText);
         $errors = [];
-        $showCreateForm = (bool)$request->get('create');
+        $showCreateForm = $request->get('create') === '1';
         $formData = [
-            'login' => trim((string)$request->get('login', '')),
-            'password' => trim((string)$request->get('password', '')),
+            'login' => Input::text($request->get('login', ''), 120),
+            'password' => Input::raw($request->get('password', ''), 255),
         ];
 
         if ($request->isMethod('POST')) {
             $showCreateForm = true;
-            $validator = (new FormValidator())
-                ->required('Логин', $formData['login'])
-                ->required('Пароль', $formData['password']);
+            $validator = new CredentialsFormValidator($formData);
 
-            $errors = $validator->errors();
+            $errors = $validator->messages();
 
             if ($errors === []) {
                 try {
@@ -54,8 +54,8 @@ class Admin
                 ->whereHas('roleRelation', function ($query) {
                     $query->where('role', User::ROLE_SYSTEM_ADMIN);
                 })
-                ->when($queryText !== '', function ($query) use ($queryText) {
-                    $query->where('login', 'like', "%{$queryText}%");
+                ->when($queryText !== '', function ($query) use ($escapedQueryText) {
+                    $query->where('login', 'like', "%{$escapedQueryText}%");
                 })
                 ->orderBy('login')
                 ->get(),

@@ -24,13 +24,16 @@
 4. WEB_PORT - порт для веб-сервера. По-умолчанию `8080`;
 5. DB_DRIVER - драйвер БД. По-умолчанию `mysql`;
 6. DB_HOST - хост БД. Для БД на хост-машине из Docker используй `host.docker.internal`;
-7. DB_PORT - порт БД. По-умолчанию `3306`;
-8. DB_DATABASE - имя базы данных;
-9. DB_USERNAME - пользователь БД;
-10. DB_PASSWORD - пароль БД;
-11. DB_AUTO_SETUP - если `true`, проект автоматически создаёт таблицы и демо-данные; для внешней готовой БД обычно нужно `false`;
-12. DB_ROOT_PASSWORD - пароль `root` для контейнера MariaDB;
-13. WEB_PORT_PHPMYADMIN - порт для phpmyadmin. По-умолчанию `8081`.
+7. DB_PORT - внешний порт MariaDB на хост-машине. По-умолчанию `3036`;
+8. DB_CONTAINER_PORT - внутренний порт MariaDB внутри docker-сети. По-умолчанию `3306`;
+9. DB_DATABASE - имя базы данных;
+10. DB_USERNAME - пользователь БД;
+11. DB_PASSWORD - пароль БД;
+12. DB_AUTO_SETUP - если `true`, проект добавляет демо-учётки `admin@company.local` и `sysadmin@company.local` с паролем `telephony123`; рабочая схема таблиц создаётся автоматически в любом случае;
+13. DB_ROOT_PASSWORD - пароль `root` для контейнера MariaDB;
+14. WEB_PORT_PHPMYADMIN - порт для phpmyadmin. По-умолчанию `8081`.
+
+Контейнеры `php` и `phpmyadmin` всегда подключаются к MariaDB по внутреннему адресу `db:3306`, поэтому данные, которые видны в phpMyAdmin на `http://localhost:8081`, и данные приложения совпадают.
 
 ## 3. Запуск и остановка
 

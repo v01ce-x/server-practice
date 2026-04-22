@@ -6,6 +6,7 @@ use FastRoute\RouteCollector;
 use FastRoute\RouteParser\Std;
 use FastRoute\DataGenerator\MarkBased;
 use FastRoute\Dispatcher\MarkBased as Dispatcher;
+use Src\Security\Csrf;
 use Src\Traits\SingletonTrait;
 
 class Middleware
@@ -35,6 +36,7 @@ class Middleware
     public function runMiddlewares(string $httpMethod, string $uri): Request
     {
         $request = new Request();
+        Csrf::validateRequest($request);
         //Получаем список всех разрешенных классов middlewares из настроек приложения
         $routeMiddleware = app()->settings->app['routeMiddleware'];
 

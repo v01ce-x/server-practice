@@ -4,9 +4,40 @@ declare(strict_types=1);
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
 ini_set('display_errors', '1');
 
+function configureSessionCookie(): void
+{
+    $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (int)($_SERVER['SERVER_PORT'] ?? 0) === 443;
+
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'secure' => $isSecure,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+}
+
+function sendSecurityHeaders(): void
+{
+    if (headers_sent()) {
+        return;
+    }
+
+    header("Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'");
+    header('X-Frame-Options: DENY');
+    header('X-Content-Type-Options: nosniff');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+}
+
+configureSessionCookie();
+
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
+
+sendSecurityHeaders();
 
 require_once __DIR__ . '/../vendor/autoload.php';
 

@@ -18,16 +18,17 @@ $currentQuery = $query ?? '';
             <div class="inline-form" style="margin-top: 20px;">
                 <?php telephony_messages($createErrors ?? []); ?>
                 <form method="post" class="inline-form">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="form" value="create_phone">
                     <div class="field-grid">
                         <div class="field">
                             <label for="phone-number">Номер телефона</label>
                             <input class="field-control" id="phone-number" name="number" type="text"
-                                   value="<?= e($createData['number'] ?? '') ?>" required>
+                                   value="<?= e($createData['number'] ?? '') ?>">
                         </div>
                         <div class="field">
                             <label for="phone-room">Помещение</label>
-                            <select class="field-select" id="phone-room" name="room_id" required>
+                            <select class="field-select" id="phone-room" name="room_id">
                                 <option value="">Выберите помещение</option>
                                 <?php foreach (($rooms ?? []) as $room): ?>
                                     <option value="<?= e($room->id) ?>" <?= (string)$room->id === (string)($createData['room_id'] ?? '') ? 'selected' : '' ?>>
@@ -38,7 +39,7 @@ $currentQuery = $query ?? '';
                         </div>
                         <div class="field">
                             <label for="phone-subscriber">Абонент</label>
-                            <select class="field-select" id="phone-subscriber" name="subscriber_id" required>
+                            <select class="field-select" id="phone-subscriber" name="subscriber_id">
                                 <option value="">Выберите абонента</option>
                                 <?php foreach (($subscribers ?? []) as $subscriber): ?>
                                     <option value="<?= e($subscriber->id) ?>" <?= (string)$subscriber->id === (string)($createData['subscriber_id'] ?? '') ? 'selected' : '' ?>>

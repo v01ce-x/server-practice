@@ -17,16 +17,17 @@ require_once __DIR__ . '/_helpers.php';
                 <div class="inline-form" style="margin-top: 20px;">
                     <?php telephony_messages($departmentErrors ?? []); ?>
                     <form method="post" class="inline-form">
+                        <?= csrf_field() ?>
                         <input type="hidden" name="form" value="create_department">
                         <div class="field">
                             <label for="department-name">Название подразделения</label>
                             <input class="field-control" id="department-name" name="name" type="text"
-                                   value="<?= e($departmentData['name'] ?? '') ?>" required>
+                                   value="<?= e($departmentData['name'] ?? '') ?>">
                         </div>
                         <div class="field">
                             <label for="department-type">Вид подразделения</label>
                             <input class="field-control" id="department-type" name="type" type="text"
-                                   value="<?= e($departmentData['type'] ?? '') ?>" placeholder="Коммерческий" required>
+                                   value="<?= e($departmentData['type'] ?? '') ?>" placeholder="Коммерческий">
                         </div>
                         <div class="inline-actions">
                             <button class="button" type="submit">Сохранить подразделение</button>
@@ -41,16 +42,17 @@ require_once __DIR__ . '/_helpers.php';
                 <div class="inline-form" style="margin-top: 20px;">
                     <?php telephony_messages($roomErrors ?? []); ?>
                     <form method="post" class="inline-form">
+                        <?= csrf_field() ?>
                         <input type="hidden" name="form" value="create_room">
                         <div class="field">
                             <label for="room-name">Название или номер помещения</label>
                             <input class="field-control" id="room-name" name="room_name" type="text"
-                                   value="<?= e($roomData['name'] ?? '') ?>" required>
+                                   value="<?= e($roomData['name'] ?? '') ?>">
                         </div>
                         <div class="field">
                             <label for="room-type">Вид помещения</label>
                             <input class="field-control" id="room-type" name="room_type" type="text"
-                                   value="<?= e($roomData['type'] ?? '') ?>" placeholder="Кабинет" required>
+                                   value="<?= e($roomData['type'] ?? '') ?>" placeholder="Кабинет">
                         </div>
                         <div class="inline-actions">
                             <button class="button" type="submit">Сохранить помещение</button>

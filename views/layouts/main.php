@@ -204,12 +204,29 @@ $menuItems = [
             gap: 4px;
         }
 
+        .sidebar__avatar {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.16);
+            color: #fff;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
         .sidebar__footer-name {
             font-weight: 700;
         }
 
         .sidebar__footer-status {
             color: var(--text-muted);
+        }
+
+        .sidebar__logout-form {
+            margin: 0;
         }
 
         .sidebar__footer-actions {
@@ -224,6 +241,14 @@ $menuItems = [
             color: #fff;
             font-size: 12px;
             opacity: .85;
+            background: none;
+            border: 0;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .sidebar__logout:hover {
+            opacity: 1;
         }
 
         .workspace {
@@ -578,7 +603,8 @@ $menuItems = [
         }
 
         .profile-card__avatar,
-        .select-card__avatar {
+        .select-card__avatar,
+        .sidebar__avatar {
             width: 74px;
             height: 74px;
             border-radius: 50%;
@@ -589,6 +615,30 @@ $menuItems = [
             color: var(--info);
             font-size: 24px;
             font-weight: 700;
+        }
+
+        .sidebar__avatar {
+            width: 58px;
+            height: 58px;
+            font-size: 18px;
+            background: rgba(255, 255, 255, 0.16);
+            color: #fff;
+        }
+
+        .profile-card__avatar.is-image,
+        .select-card__avatar.is-image,
+        .sidebar__avatar.is-image {
+            overflow: hidden;
+            padding: 0;
+            background: #fff;
+        }
+
+        .avatar-image {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            border-radius: inherit;
         }
 
         .profile-card__name {
@@ -981,11 +1031,12 @@ $menuItems = [
             </nav>
             <?php if ($currentUser): ?>
                 <div class="sidebar__footer">
+                    <?= telephony_avatar($currentUser->getAvatarFallback(), $currentUser->avatar_url, 'sidebar__avatar', 'Аватар пользователя') ?>
                     <div class="sidebar__footer-name"><?= e($currentUser->getShortName()) ?></div>
                     <div class="sidebar__footer-status"><?= e(mb_strtolower($currentUser->getStatusLabel())) ?></div>
                     <div class="sidebar__footer-actions">
                         <?= telephony_status_badge($currentUser->getStatusLabel(), $currentUser->status === User::STATUS_ACTIVE ? 'success' : 'warning') ?>
-                        <a class="sidebar__logout" href="<?= e(url('/logout')) ?>">Выйти</a>
+                        <?= telephony_logout_form(url('/logout')) ?>
                     </div>
                 </div>
             <?php endif; ?>
@@ -1000,84 +1051,5 @@ $menuItems = [
         </main>
     </div>
 <?php endif; ?>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const dateInputs = document.querySelectorAll('[data-date-input]');
-
-        if (dateInputs.length === 0) {
-            return;
-        }
-
-        const formatDateValue = (value) => {
-            const digits = value.replace(/\D/g, '').slice(0, 8);
-            const parts = [];
-
-            if (digits.length > 0) {
-                parts.push(digits.slice(0, 2));
-            }
-
-            if (digits.length > 2) {
-                parts.push(digits.slice(2, 4));
-            }
-
-            if (digits.length > 4) {
-                parts.push(digits.slice(4, 8));
-            }
-
-            return parts.join('.');
-        };
-
-        const isValidDateValue = (value) => {
-            if (!/^\d{2}\.\d{2}\.\d{4}$/.test(value)) {
-                return false;
-            }
-
-            const [day, month, year] = value.split('.').map(Number);
-            const date = new Date(year, month - 1, day);
-
-            return date.getFullYear() === year
-                && date.getMonth() === month - 1
-                && date.getDate() === day;
-        };
-
-        const syncDateValidity = (input) => {
-            if (input.value === '') {
-                input.setCustomValidity('');
-                return;
-            }
-
-            input.setCustomValidity(
-                isValidDateValue(input.value)
-                    ? ''
-                    : 'Введите дату в формате ДД.ММ.ГГГГ, например 12.01.2007.'
-            );
-        };
-
-        dateInputs.forEach((input) => {
-            input.addEventListener('input', () => {
-                input.value = formatDateValue(input.value);
-                syncDateValidity(input);
-            });
-
-            input.addEventListener('blur', () => {
-                syncDateValidity(input);
-            });
-        });
-
-        document.querySelectorAll('form[method="post"]').forEach((form) => {
-            form.addEventListener('submit', (event) => {
-                form.querySelectorAll('[data-date-input]').forEach((input) => {
-                    input.value = formatDateValue(input.value);
-                    syncDateValidity(input);
-                });
-
-                if (!form.checkValidity()) {
-                    event.preventDefault();
-                    form.reportValidity();
-                }
-            });
-        });
-    });
-</script>
 </body>
 </html>

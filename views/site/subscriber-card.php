@@ -15,7 +15,7 @@ $primaryNumber = $subscriber->phone?->number ?? '—';
         <aside class="profile-card">
             <h2>Профиль</h2>
             <p class="section-caption">Основная информация об абоненте.</p>
-            <div class="profile-card__avatar"><?= e($subscriber->initials ?: telephony_initials($subscriber->full_name)) ?></div>
+            <?= telephony_avatar($subscriber->initials ?: telephony_initials($subscriber->full_name), null, 'profile-card__avatar', 'Аватар абонента') ?>
             <div class="profile-card__name"><?= e($subscriber->full_name) ?></div>
             <div class="profile-card__meta"><?= e($subscriber->department?->name ?? 'Без подразделения') ?></div>
             <div style="margin-top: 14px;"><?= telephony_status_badge('Активен', 'success') ?></div>
@@ -31,16 +31,17 @@ $primaryNumber = $subscriber->phone?->number ?? '—';
             <div class="inline-form" style="margin-top: 20px;">
                 <?php telephony_messages($formErrors ?? []); ?>
                 <form method="post" class="inline-form">
+                    <?= csrf_field() ?>
                     <div class="field-grid">
                         <div class="field">
                             <label for="card-last-name">Фамилия</label>
                             <input class="field-control" id="card-last-name" name="last_name" type="text"
-                                   value="<?= e($formData['last_name'] ?? '') ?>" required>
+                                   value="<?= e($formData['last_name'] ?? '') ?>">
                         </div>
                         <div class="field">
                             <label for="card-first-name">Имя</label>
                             <input class="field-control" id="card-first-name" name="first_name" type="text"
-                                   value="<?= e($formData['first_name'] ?? '') ?>" required>
+                                   value="<?= e($formData['first_name'] ?? '') ?>">
                         </div>
                         <div class="field">
                             <label for="card-middle-name">Отчество</label>
@@ -51,12 +52,11 @@ $primaryNumber = $subscriber->phone?->number ?? '—';
                             <label for="card-birth-date">Дата рождения</label>
                             <input class="field-control" id="card-birth-date" name="birth_date" type="text"
                                    value="<?= e($formData['birth_date'] ?? '') ?>" placeholder="12.01.2007"
-                                   inputmode="numeric" maxlength="10" pattern="\d{2}\.\d{2}\.\d{4}"
-                                   title="Введите дату в формате ДД.ММ.ГГГГ" data-date-input="true" required>
+                                   inputmode="numeric" maxlength="10">
                         </div>
                         <div class="field">
                             <label for="card-department">Подразделение</label>
-                            <select class="field-select" id="card-department" name="department_id" required>
+                            <select class="field-select" id="card-department" name="department_id">
                                 <?php foreach (($departments ?? []) as $department): ?>
                                     <option value="<?= e($department->id) ?>" <?= (string)$department->id === (string)($formData['department_id'] ?? '') ? 'selected' : '' ?>>
                                         <?= e($department->name) ?>

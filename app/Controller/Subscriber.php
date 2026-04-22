@@ -4,9 +4,10 @@ namespace Controller;
 
 use Model\Department;
 use Model\Subscriber as SubscriberModel;
-use Src\FormValidator;
 use Src\Request;
+use Src\Security\Input;
 use Src\Session;
+use Src\Validator\Forms\SubscriberFormValidator;
 use Src\View;
 use Throwable;
 
@@ -16,18 +17,18 @@ class Subscriber
     {
         $errors = [];
         $formData = [
-            'last_name' => trim((string)$request->get('last_name', '')),
-            'first_name' => trim((string)$request->get('first_name', '')),
-            'middle_name' => trim((string)$request->get('middle_name', '')),
-            'birth_date' => trim((string)$request->get('birth_date', '')),
-            'department_id' => (string)$request->get('department_id', ''),
+            'last_name' => Input::text($request->get('last_name', ''), 80),
+            'first_name' => Input::text($request->get('first_name', ''), 80),
+            'middle_name' => Input::text($request->get('middle_name', ''), 80),
+            'birth_date' => Input::text($request->get('birth_date', ''), 10),
+            'department_id' => Input::numericString($request->get('department_id', '')),
         ];
 
-        $showCreateForm = (bool)$request->get('create');
+        $showCreateForm = $request->get('create') === '1';
 
         if ($request->isMethod('POST') && $request->get('form') === 'create_subscriber') {
             $showCreateForm = true;
-            $errors = $this->validateSubscriberData($formData);
+            $errors = (new SubscriberFormValidator($formData))->messages();
 
             if ($errors === []) {
                 try {
@@ -47,9 +48,14 @@ class Subscriber
             }
         }
 
-        $departmentFilter = (string)$request->get('department', '');
-        $stateFilter = (string)$request->get('state', 'all');
-        $queryText = trim((string)$request->get('q', ''));
+        $departmentFilter = Input::numericString($request->get('department', ''));
+        $stateFilter = Input::enum(
+            $request->get('state', 'all'),
+            ['all', 'with_phone', 'without_phone'],
+            'all'
+        );
+        $queryText = Input::search($request->get('q', ''));
+        $escapedQueryText = Input::escapeLike($queryText);
 
         $subscribers = SubscriberModel::query()
             ->with(['department', 'phone.room'])
@@ -62,12 +68,12 @@ class Subscriber
             ->when($stateFilter === 'without_phone', function ($query) {
                 $query->doesntHave('phone');
             })
-            ->when($queryText !== '', function ($query) use ($queryText) {
-                $query->where(function ($inner) use ($queryText) {
+            ->when($queryText !== '', function ($query) use ($escapedQueryText) {
+                $query->where(function ($inner) use ($escapedQueryText) {
                     $inner
-                        ->where('last_name', 'like', "%{$queryText}%")
-                        ->orWhere('first_name', 'like', "%{$queryText}%")
-                        ->orWhere('patronymic', 'like', "%{$queryText}%");
+                        ->where('last_name', 'like', "%{$escapedQueryText}%")
+                        ->orWhere('first_name', 'like', "%{$escapedQueryText}%")
+                        ->orWhere('patronymic', 'like', "%{$escapedQueryText}%");
                 });
             })
             ->orderBy('last_name')
@@ -96,15 +102,15 @@ class Subscriber
 
         $errors = [];
         $formData = [
-            'last_name' => trim((string)$request->get('last_name', $subscriber->last_name)),
-            'first_name' => trim((string)$request->get('first_name', $subscriber->first_name)),
-            'middle_name' => trim((string)$request->get('middle_name', $subscriber->middle_name)),
-            'birth_date' => trim((string)$request->get('birth_date', $subscriber->birthdate ? $subscriber->birth_date_formatted : '')),
-            'department_id' => (string)$request->get('department_id', (string)$subscriber->department_id),
+            'last_name' => Input::text($request->get('last_name', $subscriber->last_name), 80),
+            'first_name' => Input::text($request->get('first_name', $subscriber->first_name), 80),
+            'middle_name' => Input::text($request->get('middle_name', $subscriber->middle_name), 80),
+            'birth_date' => Input::text($request->get('birth_date', $subscriber->birthdate ? $subscriber->birth_date_formatted : ''), 10),
+            'department_id' => Input::numericString($request->get('department_id', (string)$subscriber->department_id)),
         ];
 
         if ($request->isMethod('POST')) {
-            $errors = $this->validateSubscriberData($formData);
+            $errors = (new SubscriberFormValidator($formData))->messages();
 
             if ($errors === []) {
                 try {
@@ -131,17 +137,7 @@ class Subscriber
             'departments' => Department::query()->orderBy('name')->get(),
             'formErrors' => $errors,
             'formData' => $formData,
-            'query' => trim((string)$request->get('q', '')),
+            'query' => Input::search($request->get('q', '')),
         ]);
-    }
-
-    private function validateSubscriberData(array $formData): array
-    {
-        return (new FormValidator())
-            ->required('Фамилия', $formData['last_name'])
-            ->required('Имя', $formData['first_name'])
-            ->russianDate('Дата рождения', $formData['birth_date'])
-            ->required('Подразделение', $formData['department_id'])
-            ->errors();
     }
 }

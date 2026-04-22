@@ -4,14 +4,14 @@ namespace Controller;
 
 use Model\Department;
 use Model\Phone;
-use Model\Role;
 use Model\Room;
 use Model\Subscriber;
 use Model\User;
 use Src\Auth\Auth as AuthService;
-use Src\FormValidator;
 use Src\Request;
+use Src\Security\Input;
 use Src\Session;
+use Src\Validator\Forms\CredentialsFormValidator;
 use Src\View;
 
 class Auth
@@ -29,22 +29,24 @@ class Auth
 
     public function login(Request $request): string
     {
-        $authRole = $request->get('auth_role', User::ROLE_SYSTEM_ADMIN);
+        $authRole = Input::enum(
+            $request->get('auth_role', User::ROLE_SYSTEM_ADMIN),
+            [User::ROLE_SYSTEM_ADMIN, User::ROLE_ADMINISTRATOR],
+            User::ROLE_SYSTEM_ADMIN
+        );
         $formData = [
-            'login' => trim((string)$request->get('login', '')),
-            'password' => (string)$request->get('password', ''),
+            'login' => Input::text($request->get('login', ''), 120),
+            'password' => Input::raw($request->get('password', ''), 255),
         ];
 
         if ($request->isMethod('POST')) {
-            $validator = (new FormValidator())
-                ->required('Логин', $formData['login'])
-                ->required('Пароль', $formData['password']);
+            $validator = new CredentialsFormValidator($formData);
 
-            if (!$validator->passes()) {
+            if ($validator->fails()) {
                 return new View('site.login', $this->loginViewData([
                     'authPage' => true,
                     'authRole' => $authRole,
-                    'messages' => $validator->errors(),
+                    'messages' => $validator->messages(),
                     'messageType' => 'error',
                     'formData' => [
                         'login' => $formData['login'],
@@ -90,8 +92,6 @@ class Auth
 
     private function loginViewData(array $extra = []): array
     {
-        Role::idFor(User::ROLE_ADMINISTRATOR);
-        Role::idFor(User::ROLE_SYSTEM_ADMIN);
         $adminCount = User::query()->count();
 
         return array_merge([

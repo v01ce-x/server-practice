@@ -12,8 +12,8 @@ class Request
 
     public function __construct()
     {
-        $this->body = $_REQUEST;
-        $this->method = $_SERVER['REQUEST_METHOD'];
+        $this->method = strtoupper((string)($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+        $this->body = array_merge($_GET, $_POST);
         $this->headers = function_exists('getallheaders') ? getallheaders() : [];
     }
 
@@ -25,6 +25,11 @@ class Request
     public function isMethod(string $method): bool
     {
         return strtoupper($this->method) === strtoupper($method);
+    }
+
+    public function isStateChanging(): bool
+    {
+        return in_array($this->method, ['POST', 'PUT', 'PATCH', 'DELETE'], true);
     }
 
     public function set($field, $value):void
@@ -45,6 +50,13 @@ class Request
     public function files(): array
     {
         return $_FILES;
+    }
+
+    public function file(string $field): ?array
+    {
+        $file = $this->files()[$field] ?? null;
+
+        return is_array($file) ? $file : null;
     }
 
     public function __get($key)
