@@ -35,12 +35,12 @@ $primaryNumber = $subscriber->phone?->number ?? '—';
                         <div class="field">
                             <label for="card-last-name">Фамилия</label>
                             <input class="field-control" id="card-last-name" name="last_name" type="text"
-                                   value="<?= e($formData['last_name'] ?? '') ?>">
+                                   value="<?= e($formData['last_name'] ?? '') ?>" required>
                         </div>
                         <div class="field">
                             <label for="card-first-name">Имя</label>
                             <input class="field-control" id="card-first-name" name="first_name" type="text"
-                                   value="<?= e($formData['first_name'] ?? '') ?>">
+                                   value="<?= e($formData['first_name'] ?? '') ?>" required>
                         </div>
                         <div class="field">
                             <label for="card-middle-name">Отчество</label>
@@ -50,11 +50,13 @@ $primaryNumber = $subscriber->phone?->number ?? '—';
                         <div class="field">
                             <label for="card-birth-date">Дата рождения</label>
                             <input class="field-control" id="card-birth-date" name="birth_date" type="text"
-                                   value="<?= e($formData['birth_date'] ?? '') ?>" placeholder="31.12.1990 или 1990-12-31">
+                                   value="<?= e($formData['birth_date'] ?? '') ?>" placeholder="12.01.2007"
+                                   inputmode="numeric" maxlength="10" pattern="\d{2}\.\d{2}\.\d{4}"
+                                   title="Введите дату в формате ДД.ММ.ГГГГ" data-date-input="true" required>
                         </div>
                         <div class="field">
                             <label for="card-department">Подразделение</label>
-                            <select class="field-select" id="card-department" name="department_id">
+                            <select class="field-select" id="card-department" name="department_id" required>
                                 <?php foreach (($departments ?? []) as $department): ?>
                                     <option value="<?= e($department->id) ?>" <?= (string)$department->id === (string)($formData['department_id'] ?? '') ? 'selected' : '' ?>>
                                         <?= e($department->name) ?>

@@ -9,6 +9,7 @@ use Model\Room;
 use Model\Subscriber;
 use Model\User;
 use Src\Auth\Auth as AuthService;
+use Src\FormValidator;
 use Src\Request;
 use Src\Session;
 use Src\View;
@@ -29,11 +30,31 @@ class Auth
     public function login(Request $request): string
     {
         $authRole = $request->get('auth_role', User::ROLE_SYSTEM_ADMIN);
+        $formData = [
+            'login' => trim((string)$request->get('login', '')),
+            'password' => (string)$request->get('password', ''),
+        ];
 
         if ($request->isMethod('POST')) {
+            $validator = (new FormValidator())
+                ->required('Логин', $formData['login'])
+                ->required('Пароль', $formData['password']);
+
+            if (!$validator->passes()) {
+                return new View('site.login', $this->loginViewData([
+                    'authPage' => true,
+                    'authRole' => $authRole,
+                    'messages' => $validator->errors(),
+                    'messageType' => 'error',
+                    'formData' => [
+                        'login' => $formData['login'],
+                    ],
+                ]));
+            }
+
             if (AuthService::attempt([
-                'login' => trim((string)$request->get('login')),
-                'password' => (string)$request->get('password'),
+                'login' => $formData['login'],
+                'password' => $formData['password'],
                 'auth_role' => $authRole,
             ])) {
                 $user = AuthService::user();
@@ -44,10 +65,10 @@ class Auth
             return new View('site.login', $this->loginViewData([
                 'authPage' => true,
                 'authRole' => $authRole,
-                'message' => 'Неверный логин, пароль или выбранная роль.',
+                'messages' => ['Неверный логин, пароль или выбранная роль.'],
                 'messageType' => 'error',
                 'formData' => [
-                    'login' => trim((string)$request->get('login')),
+                    'login' => $formData['login'],
                 ],
             ]));
         }

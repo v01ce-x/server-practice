@@ -23,11 +23,11 @@ $currentQuery = $query ?? '';
                         <div class="field">
                             <label for="phone-number">Номер телефона</label>
                             <input class="field-control" id="phone-number" name="number" type="text"
-                                   value="<?= e($createData['number'] ?? '') ?>">
+                                   value="<?= e($createData['number'] ?? '') ?>" required>
                         </div>
                         <div class="field">
                             <label for="phone-room">Помещение</label>
-                            <select class="field-select" id="phone-room" name="room_id">
+                            <select class="field-select" id="phone-room" name="room_id" required>
                                 <option value="">Выберите помещение</option>
                                 <?php foreach (($rooms ?? []) as $room): ?>
                                     <option value="<?= e($room->id) ?>" <?= (string)$room->id === (string)($createData['room_id'] ?? '') ? 'selected' : '' ?>>
@@ -38,7 +38,7 @@ $currentQuery = $query ?? '';
                         </div>
                         <div class="field">
                             <label for="phone-subscriber">Абонент</label>
-                            <select class="field-select" id="phone-subscriber" name="subscriber_id">
+                            <select class="field-select" id="phone-subscriber" name="subscriber_id" required>
                                 <option value="">Выберите абонента</option>
                                 <?php foreach (($subscribers ?? []) as $subscriber): ?>
                                     <option value="<?= e($subscriber->id) ?>" <?= (string)$subscriber->id === (string)($createData['subscriber_id'] ?? '') ? 'selected' : '' ?>>

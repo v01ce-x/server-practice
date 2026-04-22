@@ -6,9 +6,14 @@ require_once __DIR__ . '/_helpers.php';
 
 $authRole = $authRole ?? User::ROLE_SYSTEM_ADMIN;
 $formData = $formData ?? ['login' => ''];
+$messages = $messages ?? [];
 $messageType = $messageType ?? 'error';
 $switchRole = $authRole === User::ROLE_SYSTEM_ADMIN ? User::ROLE_ADMINISTRATOR : User::ROLE_SYSTEM_ADMIN;
 $switchLabel = $authRole === User::ROLE_SYSTEM_ADMIN ? 'Открыть режим администратора' : 'Перейти в режим сисадмина';
+
+if (!empty($message)) {
+    $messages[] = $message;
+}
 ?>
 <div class="auth-shell">
     <section class="auth-side">
@@ -28,8 +33,8 @@ $switchLabel = $authRole === User::ROLE_SYSTEM_ADMIN ? 'Открыть режи�
             <h2>Войти в систему</h2>
             <p>Выбери сценарий входа и продолжай работу.</p>
             <div class="auth-card__body">
-                <?php if (!empty($message)): ?>
-                    <?php telephony_messages([$message], $messageType); ?>
+                <?php if (!empty($messages)): ?>
+                    <?php telephony_messages($messages, $messageType); ?>
                 <?php endif; ?>
                 <?php if (!empty($setupHint)): ?>
                     <?php telephony_messages([$setupHint], 'success'); ?>
@@ -38,12 +43,12 @@ $switchLabel = $authRole === User::ROLE_SYSTEM_ADMIN ? 'Открыть режи�
                     <div class="field">
                         <label for="login">Логин</label>
                         <input class="field-control" id="login" name="login" type="text"
-                               value="<?= e($formData['login'] ?? '') ?>" placeholder="sysadmin@company.local">
+                               value="<?= e($formData['login'] ?? '') ?>" placeholder="sysadmin@company.local" required>
                     </div>
                     <div class="field">
                         <label for="password">Пароль</label>
                         <input class="field-control" id="password" name="password" type="password"
-                               placeholder="••••••••••••">
+                               placeholder="••••••••••••" required>
                     </div>
                     <div class="inline-actions">
                         <button class="button" type="submit">Войти в рабочее пространство</button>

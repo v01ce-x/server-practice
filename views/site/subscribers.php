@@ -61,12 +61,12 @@ $currentState = $stateFilter ?? 'all';
                         <div class="field">
                             <label for="subscriber-last-name">Фамилия</label>
                             <input class="field-control" id="subscriber-last-name" name="last_name" type="text"
-                                   value="<?= e($createData['last_name'] ?? '') ?>">
+                                   value="<?= e($createData['last_name'] ?? '') ?>" required>
                         </div>
                         <div class="field">
                             <label for="subscriber-first-name">Имя</label>
                             <input class="field-control" id="subscriber-first-name" name="first_name" type="text"
-                                   value="<?= e($createData['first_name'] ?? '') ?>">
+                                   value="<?= e($createData['first_name'] ?? '') ?>" required>
                         </div>
                         <div class="field">
                             <label for="subscriber-middle-name">Отчество</label>
@@ -76,11 +76,13 @@ $currentState = $stateFilter ?? 'all';
                         <div class="field">
                             <label for="subscriber-birth-date">Дата рождения</label>
                             <input class="field-control" id="subscriber-birth-date" name="birth_date" type="text"
-                                   value="<?= e($createData['birth_date'] ?? '') ?>" placeholder="31.12.1990 или 1990-12-31">
+                                   value="<?= e($createData['birth_date'] ?? '') ?>" placeholder="12.01.2007"
+                                   inputmode="numeric" maxlength="10" pattern="\d{2}\.\d{2}\.\d{4}"
+                                   title="Введите дату в формате ДД.ММ.ГГГГ" data-date-input="true" required>
                         </div>
                         <div class="field">
                             <label for="subscriber-department">Подразделение</label>
-                            <select class="field-select" id="subscriber-department" name="department_id">
+                            <select class="field-select" id="subscriber-department" name="department_id" required>
                                 <option value="">Выберите подразделение</option>
                                 <?php foreach (($departments ?? []) as $department): ?>
                                     <option value="<?= e($department->id) ?>" <?= (string)$department->id === (string)($createData['department_id'] ?? '') ? 'selected' : '' ?>>

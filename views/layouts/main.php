@@ -1000,5 +1000,84 @@ $menuItems = [
         </main>
     </div>
 <?php endif; ?>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dateInputs = document.querySelectorAll('[data-date-input]');
+
+        if (dateInputs.length === 0) {
+            return;
+        }
+
+        const formatDateValue = (value) => {
+            const digits = value.replace(/\D/g, '').slice(0, 8);
+            const parts = [];
+
+            if (digits.length > 0) {
+                parts.push(digits.slice(0, 2));
+            }
+
+            if (digits.length > 2) {
+                parts.push(digits.slice(2, 4));
+            }
+
+            if (digits.length > 4) {
+                parts.push(digits.slice(4, 8));
+            }
+
+            return parts.join('.');
+        };
+
+        const isValidDateValue = (value) => {
+            if (!/^\d{2}\.\d{2}\.\d{4}$/.test(value)) {
+                return false;
+            }
+
+            const [day, month, year] = value.split('.').map(Number);
+            const date = new Date(year, month - 1, day);
+
+            return date.getFullYear() === year
+                && date.getMonth() === month - 1
+                && date.getDate() === day;
+        };
+
+        const syncDateValidity = (input) => {
+            if (input.value === '') {
+                input.setCustomValidity('');
+                return;
+            }
+
+            input.setCustomValidity(
+                isValidDateValue(input.value)
+                    ? ''
+                    : 'Введите дату в формате ДД.ММ.ГГГГ, например 12.01.2007.'
+            );
+        };
+
+        dateInputs.forEach((input) => {
+            input.addEventListener('input', () => {
+                input.value = formatDateValue(input.value);
+                syncDateValidity(input);
+            });
+
+            input.addEventListener('blur', () => {
+                syncDateValidity(input);
+            });
+        });
+
+        document.querySelectorAll('form[method="post"]').forEach((form) => {
+            form.addEventListener('submit', (event) => {
+                form.querySelectorAll('[data-date-input]').forEach((input) => {
+                    input.value = formatDateValue(input.value);
+                    syncDateValidity(input);
+                });
+
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    form.reportValidity();
+                }
+            });
+        });
+    });
+</script>
 </body>
 </html>

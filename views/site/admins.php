@@ -20,11 +20,11 @@ require_once __DIR__ . '/_helpers.php';
                         <div class="field">
                             <label for="admin-login">Логин</label>
                             <input class="field-control" id="admin-login" name="login" type="text"
-                                   value="<?= e($createData['login'] ?? '') ?>" placeholder="sysadmin@company.local">
+                                   value="<?= e($createData['login'] ?? '') ?>" placeholder="sysadmin@company.local" required>
                         </div>
                         <div class="field">
                             <label for="admin-password">Пароль</label>
-                            <input class="field-control" id="admin-password" name="password" type="password">
+                            <input class="field-control" id="admin-password" name="password" type="password" required>
                         </div>
                     </div>
                     <div class="inline-actions">

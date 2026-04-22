@@ -4,6 +4,7 @@ namespace Controller;
 
 use Model\Department;
 use Model\Subscriber as SubscriberModel;
+use Src\FormValidator;
 use Src\Request;
 use Src\Session;
 use Src\View;
@@ -26,19 +27,23 @@ class Subscriber
 
         if ($request->isMethod('POST') && $request->get('form') === 'create_subscriber') {
             $showCreateForm = true;
-            try {
-                $subscriber = SubscriberModel::query()->create([
-                    'last_name' => $formData['last_name'],
-                    'first_name' => $formData['first_name'],
-                    'patronymic' => $formData['middle_name'],
-                    'birthdate' => $formData['birth_date'],
-                    'division_id' => (int)$formData['department_id'],
-                ]);
+            $errors = $this->validateSubscriberData($formData);
 
-                Session::flash('Абонент добавлен.');
-                app()->route->redirect('/subscribers/' . $subscriber->id);
-            } catch (Throwable $exception) {
-                $errors[] = $exception->getMessage();
+            if ($errors === []) {
+                try {
+                    $subscriber = SubscriberModel::query()->create([
+                        'last_name' => $formData['last_name'],
+                        'first_name' => $formData['first_name'],
+                        'patronymic' => $formData['middle_name'],
+                        'birthdate' => $formData['birth_date'],
+                        'division_id' => (int)$formData['department_id'],
+                    ]);
+
+                    Session::flash('Абонент добавлен.');
+                    app()->route->redirect('/subscribers/' . $subscriber->id);
+                } catch (Throwable $exception) {
+                    $errors[] = $exception->getMessage();
+                }
             }
         }
 
@@ -94,25 +99,29 @@ class Subscriber
             'last_name' => trim((string)$request->get('last_name', $subscriber->last_name)),
             'first_name' => trim((string)$request->get('first_name', $subscriber->first_name)),
             'middle_name' => trim((string)$request->get('middle_name', $subscriber->middle_name)),
-            'birth_date' => trim((string)$request->get('birth_date', $subscriber->birthdate)),
+            'birth_date' => trim((string)$request->get('birth_date', $subscriber->birthdate ? $subscriber->birth_date_formatted : '')),
             'department_id' => (string)$request->get('department_id', (string)$subscriber->department_id),
         ];
 
         if ($request->isMethod('POST')) {
-            try {
-                $subscriber->fill([
-                    'last_name' => $formData['last_name'],
-                    'first_name' => $formData['first_name'],
-                    'patronymic' => $formData['middle_name'],
-                    'birthdate' => $formData['birth_date'],
-                    'division_id' => (int)$formData['department_id'],
-                ]);
-                $subscriber->save();
+            $errors = $this->validateSubscriberData($formData);
 
-                Session::flash('Карточка абонента обновлена.');
-                app()->route->redirect('/subscribers/' . $subscriber->id);
-            } catch (Throwable $exception) {
-                $errors[] = $exception->getMessage();
+            if ($errors === []) {
+                try {
+                    $subscriber->fill([
+                        'last_name' => $formData['last_name'],
+                        'first_name' => $formData['first_name'],
+                        'patronymic' => $formData['middle_name'],
+                        'birthdate' => $formData['birth_date'],
+                        'division_id' => (int)$formData['department_id'],
+                    ]);
+                    $subscriber->save();
+
+                    Session::flash('Карточка абонента обновлена.');
+                    app()->route->redirect('/subscribers/' . $subscriber->id);
+                } catch (Throwable $exception) {
+                    $errors[] = $exception->getMessage();
+                }
             }
         }
 
@@ -124,5 +133,15 @@ class Subscriber
             'formData' => $formData,
             'query' => trim((string)$request->get('q', '')),
         ]);
+    }
+
+    private function validateSubscriberData(array $formData): array
+    {
+        return (new FormValidator())
+            ->required('Фамилия', $formData['last_name'])
+            ->required('Имя', $formData['first_name'])
+            ->russianDate('Дата рождения', $formData['birth_date'])
+            ->required('Подразделение', $formData['department_id'])
+            ->errors();
     }
 }

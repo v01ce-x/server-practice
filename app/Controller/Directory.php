@@ -8,6 +8,7 @@ use Model\Room;
 use Model\RoomType;
 use Model\User;
 use Src\Auth\Auth as AuthService;
+use Src\FormValidator;
 use Src\Request;
 use Src\Session;
 use Src\View;
@@ -34,40 +35,54 @@ class Directory
 
         if ($request->isMethod('POST') && $request->get('form') === 'create_department') {
             $showDepartmentForm = true;
-            try {
-                /** @var User $user */
-                $user = AuthService::user();
-                $typeId = (int)DivisionType::query()->firstOrCreate([
-                    'type_name' => $departmentData['type'],
-                ])->id;
+            $departmentErrors = (new FormValidator())
+                ->required('Название подразделения', $departmentData['name'])
+                ->required('Вид подразделения', $departmentData['type'])
+                ->errors();
 
-                Department::query()->create([
-                    'name' => $departmentData['name'],
-                    'type_id' => $typeId,
-                    'admin_id' => $user->id,
-                ]);
-                Session::flash('Подразделение добавлено.');
-                app()->route->redirect('/directories');
-            } catch (Throwable $exception) {
-                $departmentErrors[] = $exception->getMessage();
+            if ($departmentErrors === []) {
+                try {
+                    /** @var User $user */
+                    $user = AuthService::user();
+                    $typeId = (int)DivisionType::query()->firstOrCreate([
+                        'type_name' => $departmentData['type'],
+                    ])->id;
+
+                    Department::query()->create([
+                        'name' => $departmentData['name'],
+                        'type_id' => $typeId,
+                        'admin_id' => $user->id,
+                    ]);
+                    Session::flash('Подразделение добавлено.');
+                    app()->route->redirect('/directories');
+                } catch (Throwable $exception) {
+                    $departmentErrors[] = $exception->getMessage();
+                }
             }
         }
 
         if ($request->isMethod('POST') && $request->get('form') === 'create_room') {
             $showRoomForm = true;
-            try {
-                $typeId = (int)RoomType::query()->firstOrCreate([
-                    'type_name' => $roomData['type'],
-                ])->id;
+            $roomErrors = (new FormValidator())
+                ->required('Название или номер помещения', $roomData['name'])
+                ->required('Вид помещения', $roomData['type'])
+                ->errors();
 
-                Room::query()->create([
-                    'name' => $roomData['name'],
-                    'type_id' => $typeId,
-                ]);
-                Session::flash('Помещение добавлено.');
-                app()->route->redirect('/directories');
-            } catch (Throwable $exception) {
-                $roomErrors[] = $exception->getMessage();
+            if ($roomErrors === []) {
+                try {
+                    $typeId = (int)RoomType::query()->firstOrCreate([
+                        'type_name' => $roomData['type'],
+                    ])->id;
+
+                    Room::query()->create([
+                        'name' => $roomData['name'],
+                        'type_id' => $typeId,
+                    ]);
+                    Session::flash('Помещение добавлено.');
+                    app()->route->redirect('/directories');
+                } catch (Throwable $exception) {
+                    $roomErrors[] = $exception->getMessage();
+                }
             }
         }
 

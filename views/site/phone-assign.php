@@ -33,11 +33,11 @@ require_once __DIR__ . '/_helpers.php';
                 <div class="field">
                     <label for="assign-number">Номер телефона</label>
                     <input class="field-control" id="assign-number" name="number" type="text"
-                           value="<?= e($formData['number'] ?? '') ?>">
+                           value="<?= e($formData['number'] ?? '') ?>" required>
                 </div>
                 <div class="field">
                     <label for="assign-room">Помещение</label>
-                    <select class="field-select" id="assign-room" name="room_id">
+                    <select class="field-select" id="assign-room" name="room_id" required>
                         <option value="">Выберите помещение</option>
                         <?php foreach (($rooms ?? []) as $room): ?>
                             <option value="<?= e($room->id) ?>" <?= (string)$room->id === (string)($formData['room_id'] ?? '') ? 'selected' : '' ?>>

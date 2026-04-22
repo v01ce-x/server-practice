@@ -5,6 +5,7 @@ namespace Controller;
 use Model\Phone as PhoneModel;
 use Model\Room;
 use Model\Subscriber;
+use Src\FormValidator;
 use Src\Request;
 use Src\Session;
 use Src\View;
@@ -24,17 +25,21 @@ class Phone
 
         if ($request->isMethod('POST') && $request->get('form') === 'create_phone') {
             $showCreateForm = true;
-            try {
-                PhoneModel::query()->create([
-                    'phone_number' => $formData['number'],
-                    'room_id' => (int)$formData['room_id'],
-                    'subscriber_id' => (int)$formData['subscriber_id'],
-                ]);
+            $errors = $this->validatePhoneData($formData, true);
 
-                Session::flash('Новый номер добавлен.');
-                app()->route->redirect('/phones');
-            } catch (Throwable $exception) {
-                $errors[] = $exception->getMessage();
+            if ($errors === []) {
+                try {
+                    PhoneModel::query()->create([
+                        'phone_number' => $formData['number'],
+                        'room_id' => (int)$formData['room_id'],
+                        'subscriber_id' => (int)$formData['subscriber_id'],
+                    ]);
+
+                    Session::flash('Новый номер добавлен.');
+                    app()->route->redirect('/phones');
+                } catch (Throwable $exception) {
+                    $errors[] = $exception->getMessage();
+                }
             }
         }
 
@@ -75,25 +80,29 @@ class Phone
         ];
 
         if ($request->isMethod('POST')) {
-            try {
-                if ($currentPhone) {
-                    $currentPhone->fill([
-                        'phone_number' => $formData['number'],
-                        'room_id' => (int)$formData['room_id'],
-                    ]);
-                    $currentPhone->save();
-                } else {
-                    PhoneModel::query()->create([
-                        'phone_number' => $formData['number'],
-                        'room_id' => (int)$formData['room_id'],
-                        'subscriber_id' => $subscriber->id,
-                    ]);
-                }
+            $errors = $this->validatePhoneData($formData);
 
-                Session::flash("Номер для абонента {$subscriber->full_name} сохранён.");
-                app()->route->redirect('/subscribers/' . $subscriber->id);
-            } catch (Throwable $exception) {
-                $errors[] = $exception->getMessage();
+            if ($errors === []) {
+                try {
+                    if ($currentPhone) {
+                        $currentPhone->fill([
+                            'phone_number' => $formData['number'],
+                            'room_id' => (int)$formData['room_id'],
+                        ]);
+                        $currentPhone->save();
+                    } else {
+                        PhoneModel::query()->create([
+                            'phone_number' => $formData['number'],
+                            'room_id' => (int)$formData['room_id'],
+                            'subscriber_id' => $subscriber->id,
+                        ]);
+                    }
+
+                    Session::flash("Номер для абонента {$subscriber->full_name} сохранён.");
+                    app()->route->redirect('/subscribers/' . $subscriber->id);
+                } catch (Throwable $exception) {
+                    $errors[] = $exception->getMessage();
+                }
             }
         }
 
@@ -105,5 +114,18 @@ class Phone
             'formData' => $formData,
             'assignErrors' => $errors,
         ]);
+    }
+
+    private function validatePhoneData(array $formData, bool $withSubscriber = false): array
+    {
+        $validator = (new FormValidator())
+            ->required('Номер телефона', $formData['number'])
+            ->required('Помещение', $formData['room_id']);
+
+        if ($withSubscriber) {
+            $validator->required('Абонент', $formData['subscriber_id']);
+        }
+
+        return $validator->errors();
     }
 }

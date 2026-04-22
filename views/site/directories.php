@@ -21,12 +21,12 @@ require_once __DIR__ . '/_helpers.php';
                         <div class="field">
                             <label for="department-name">Название подразделения</label>
                             <input class="field-control" id="department-name" name="name" type="text"
-                                   value="<?= e($departmentData['name'] ?? '') ?>">
+                                   value="<?= e($departmentData['name'] ?? '') ?>" required>
                         </div>
                         <div class="field">
                             <label for="department-type">Вид подразделения</label>
                             <input class="field-control" id="department-type" name="type" type="text"
-                                   value="<?= e($departmentData['type'] ?? '') ?>" placeholder="Коммерческий">
+                                   value="<?= e($departmentData['type'] ?? '') ?>" placeholder="Коммерческий" required>
                         </div>
                         <div class="inline-actions">
                             <button class="button" type="submit">Сохранить подразделение</button>
@@ -45,12 +45,12 @@ require_once __DIR__ . '/_helpers.php';
                         <div class="field">
                             <label for="room-name">Название или номер помещения</label>
                             <input class="field-control" id="room-name" name="room_name" type="text"
-                                   value="<?= e($roomData['name'] ?? '') ?>">
+                                   value="<?= e($roomData['name'] ?? '') ?>" required>
                         </div>
                         <div class="field">
                             <label for="room-type">Вид помещения</label>
                             <input class="field-control" id="room-type" name="room_type" type="text"
-                                   value="<?= e($roomData['type'] ?? '') ?>" placeholder="Кабинет">
+                                   value="<?= e($roomData['type'] ?? '') ?>" placeholder="Кабинет" required>
                         </div>
                         <div class="inline-actions">
                             <button class="button" type="submit">Сохранить помещение</button>

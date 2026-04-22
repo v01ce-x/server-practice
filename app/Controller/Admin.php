@@ -4,6 +4,7 @@ namespace Controller;
 
 use Model\Role;
 use Model\User;
+use Src\FormValidator;
 use Src\Request;
 use Src\Session;
 use Src\View;
@@ -23,17 +24,25 @@ class Admin
 
         if ($request->isMethod('POST')) {
             $showCreateForm = true;
-            try {
-                User::query()->create([
-                    'login' => $formData['login'],
-                    'password' => $formData['password'],
-                    'role_id' => Role::idFor(User::ROLE_SYSTEM_ADMIN),
-                ]);
+            $validator = (new FormValidator())
+                ->required('Логин', $formData['login'])
+                ->required('Пароль', $formData['password']);
 
-                Session::flash('Системный администратор добавлен.');
-                app()->route->redirect('/admins');
-            } catch (Throwable $exception) {
-                $errors[] = $exception->getMessage();
+            $errors = $validator->errors();
+
+            if ($errors === []) {
+                try {
+                    User::query()->create([
+                        'login' => $formData['login'],
+                        'password' => $formData['password'],
+                        'role_id' => Role::idFor(User::ROLE_SYSTEM_ADMIN),
+                    ]);
+
+                    Session::flash('Системный администратор добавлен.');
+                    app()->route->redirect('/admins');
+                } catch (Throwable $exception) {
+                    $errors[] = $exception->getMessage();
+                }
             }
         }
 
