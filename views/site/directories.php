@@ -6,8 +6,7 @@ require_once __DIR__ . '/_helpers.php';
     <?php telephony_page_header('Подразделения и помещения', 'Справочники с максимально простой структурой.', $query ?? ''); ?>
 
     <div class="toolbar">
-        <a class="button" href="<?= e(url('/directories?create=department')) ?>">Добавить подразделение</a>
-        <a class="button-secondary" href="<?= e(url('/directories?create=room')) ?>">Добавить помещение</a>
+        <a class="button" href="<?= e(url('/directories?create=department&&room')) ?>">Добавить подразделение или помещение</a>
     </div>
 
     <?php if (!empty($showDepartmentForm) || !empty($showRoomForm) || !empty($departmentErrors) || !empty($roomErrors)): ?>
