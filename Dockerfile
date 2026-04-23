@@ -1,4 +1,4 @@
-FROM php:8-apache
+FROM php:8.0-apache
 ARG USER=user
 ARG PASSWORD=password
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public

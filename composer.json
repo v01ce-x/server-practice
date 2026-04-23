@@ -10,6 +10,7 @@
         }
     ],
     "minimum-stability": "dev",
+    "prefer-stable": true,
     "repositories": [
         {
             "type": "vcs",
@@ -17,16 +18,23 @@
         }
     ],
     "require": {
-        "php": "^8.4",
-        "illuminate/database": "13.x-dev",
-        "illuminate/events": "13.x-dev",
-        "nikic/fast-route": "^2.0@dev",
+        "php": "^8.0.2",
+        "illuminate/database": "^9.0",
+        "illuminate/events": "^9.0",
+        "nikic/fast-route": "^1.3",
         "vo1ce-x/collection": "dev-main"
     },
     "autoload": {
         "psr-4": {
             "Src\\": "core/Src/",
-            "": "app/"
+            "Controller\\": "app/Controller/",
+            "Model\\": "app/Model/",
+            "Middlewares\\": "app/Middlewares/"
+        }
+    },
+    "config": {
+        "platform": {
+            "php": "8.0.30"
         }
     }
 }
