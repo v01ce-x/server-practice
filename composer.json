@@ -10,11 +10,18 @@
         }
     ],
     "minimum-stability": "dev",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/v01ce-x/collection.git"
+        }
+    ],
     "require": {
         "php": "^8.4",
         "illuminate/database": "13.x-dev",
         "illuminate/events": "13.x-dev",
-        "nikic/fast-route": "^2.0@dev"
+        "nikic/fast-route": "^2.0@dev",
+        "vo1ce-x/collection": "dev-main"
     },
     "autoload": {
         "psr-4": {

@@ -1,5 +1,6 @@
 <?php
 use Src\Security\Csrf;
+use function Collect\collection;
 
 const DIR_CONFIG = '/../config';
 
@@ -7,12 +8,16 @@ if (!function_exists('getConfigs')) {
     function getConfigs(string $path = DIR_CONFIG): array
     {
         $settings = [];
-        foreach (scandir(__DIR__ . $path) as $file) {
-            $name = explode('.', $file)[0];
-            if (!empty($name)) {
-                $settings[$name] = include __DIR__ . "$path/$file";
-            }
-        }
+
+        collection(scandir(__DIR__ . $path) ?: [])
+            ->each(static function (string $file) use ($path, &$settings): void {
+                $name = explode('.', $file)[0];
+
+                if ($name !== '') {
+                    $settings[$name] = include __DIR__ . "$path/$file";
+                }
+            });
+
         return $settings;
     }
 }

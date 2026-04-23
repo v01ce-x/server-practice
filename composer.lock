@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "051e943e7634792295b9a7787b36a63d",
+    "content-hash": "dea8d293170eeb51ff3cf312ec3b7177",
     "packages": [
         {
             "name": "brick/math",
@@ -1792,6 +1792,50 @@
             "time": "2026-01-05T13:30:16+00:00"
         },
         {
+            "name": "vo1ce-x/collection",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/v01ce-x/collection.git",
+                "reference": "d3f9c1f5db9320fb43e5c3267cde41ceded86d3e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/v01ce-x/collection/zipball/d3f9c1f5db9320fb43e5c3267cde41ceded86d3e",
+                "reference": "d3f9c1f5db9320fb43e5c3267cde41ceded86d3e",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.4 | ^8.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/helpers.php"
+                ],
+                "psr-4": {
+                    "Collect\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Daniil Kiryakov",
+                    "email": "kiriakovdaniil717@gmail.com"
+                }
+            ],
+            "description": "Module for working with arrays",
+            "support": {
+                "issues": "https://github.com/v01ce-x/collection/issues",
+                "source": "https://github.com/v01ce-x/collection/tree/main"
+            },
+            "time": "2026-04-23T04:48:26+00:00"
+        },
+        {
             "name": "voku/portable-ascii",
             "version": "2.1.0",
             "source": {
@@ -1872,12 +1916,13 @@
     "stability-flags": {
         "illuminate/database": 20,
         "illuminate/events": 20,
-        "nikic/fast-route": 20
+        "nikic/fast-route": 20,
+        "vo1ce-x/collection": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "^7.4 | ^8.0"
+        "php": "^8.4"
     },
     "platform-dev": {},
     "plugin-api-version": "2.9.0"
