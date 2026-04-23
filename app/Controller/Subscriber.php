@@ -13,7 +13,7 @@ use Throwable;
 
 class Subscriber
 {
-    public function index(Request $request): string
+    public function index(Request $request): View|string
     {
         $errors = [];
         $formData = [
@@ -93,7 +93,7 @@ class Subscriber
         ]);
     }
 
-    public function show(int $id, Request $request): string
+    public function show(int $id, Request $request): View|string
     {
         /** @var SubscriberModel $subscriber */
         $subscriber = SubscriberModel::query()

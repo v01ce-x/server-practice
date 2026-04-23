@@ -24,7 +24,7 @@ class View
         global $app;
         $path = $app->settings->getViewsPath();
 
-        return dirname($_SERVER['DOCUMENT_ROOT']) . $path;
+        return dirname(__DIR__, 2) . $path;
     }
 
     //Путь до основного файла с шаблоном сайта
@@ -43,8 +43,9 @@ class View
     public function render(string $view = '', array $data = []): string
     {
         $path = $this->getPathToView($view);
+        $layoutPath = $this->getPathToMain();
 
-        if (file_exists($this->getPathToMain()) && file_exists($path)) {
+        if (file_exists($layoutPath) && file_exists($path)) {
 
             //Импортирует переменные из массива в текущую таблицу символов
             extract($data, EXTR_PREFIX_SAME, '');
@@ -57,10 +58,15 @@ class View
 
             //Собираем основной шаблон в строку и возвращаем результат
             ob_start();
-            require $this->getPathToMain();
+            require $layoutPath;
             return ob_get_clean();
         }
-        throw new Exception('Error render');
+
+        throw new Exception(sprintf(
+            'Error render: layout `%s` or view `%s` not found',
+            $layoutPath,
+            $path
+        ));
     }
 
     public function __toString(): string

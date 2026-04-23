@@ -11,7 +11,7 @@ use Src\View;
 
 class Report
 {
-    public function index(Request $request): string
+    public function index(Request $request): View|string
     {
         $queryText = Input::search($request->get('q', ''));
         [$departmentStats, $roomStats] = $this->buildStats();

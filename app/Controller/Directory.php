@@ -18,7 +18,7 @@ use Throwable;
 
 class Directory
 {
-    public function index(Request $request): string
+    public function index(Request $request): View|string
     {
         $queryText = Input::search($request->get('q', ''));
         $escapedQueryText = Input::escapeLike($queryText);

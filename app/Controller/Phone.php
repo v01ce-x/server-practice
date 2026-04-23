@@ -14,7 +14,7 @@ use Throwable;
 
 class Phone
 {
-    public function index(Request $request): string
+    public function index(Request $request): View|string
     {
         $errors = [];
         $showCreateForm = $request->get('create') === '1';
@@ -67,7 +67,7 @@ class Phone
         ]);
     }
 
-    public function assign(int $subscriberId, Request $request): string
+    public function assign(int $subscriberId, Request $request): View|string
     {
         /** @var Subscriber $subscriber */
         $subscriber = Subscriber::query()

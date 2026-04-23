@@ -27,7 +27,7 @@ class Auth
         app()->route->redirect($user->isAdministrator() ? '/admins' : '/dashboard');
     }
 
-    public function login(Request $request): string
+    public function login(Request $request): View|string
     {
         $authRole = Input::enum(
             $request->get('auth_role', User::ROLE_SYSTEM_ADMIN),

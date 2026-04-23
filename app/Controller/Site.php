@@ -16,12 +16,12 @@ class Site
         return (new View())->render('site.post', ['posts' => $posts]);
     }
 
-    public function hello(): string
+    public function hello(): View|string
     {
         return new View('site.hello', ['message' => 'hello working']);
     }
 
-    public function signup(Request $request): string
+    public function signup(Request $request): View|string
     {
         if ($request->method === 'POST' && User::create($request->all())) {
             app()->route->redirect('/login');
@@ -29,7 +29,7 @@ class Site
         return new View('site.signup');
     }
 
-    public function login(Request $request): string
+    public function login(Request $request): View|string
     {
         //Если просто обращение к странице, то отобразить форму
         if ($request->method === 'GET') {

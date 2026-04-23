@@ -17,7 +17,7 @@ use Throwable;
 
 class Dashboard
 {
-    public function index(Request $request): string
+    public function index(Request $request): View|string
     {
         /** @var User $user */
         $user = AuthService::user();
