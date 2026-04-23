@@ -40,6 +40,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 sendSecurityHeaders();
 
 require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../core/project_autoload.php';
 
 function renderBootstrapError(\Throwable $exception): void
 {
