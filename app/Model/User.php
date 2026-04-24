@@ -22,6 +22,11 @@ class User extends Model implements IdentityInterface
         'role_id',
     ];
 
+    protected $hidden = [
+        'password',
+        'api_token',
+    ];
+
     protected static function booted(): void
     {
         static::saving(function (self $user) {
@@ -44,6 +49,14 @@ class User extends Model implements IdentityInterface
     public function getId(): int
     {
         return (int)$this->id;
+    }
+
+    public function findIdentityByToken(string $token)
+    {
+        return self::query()
+            ->with('roleRelation')
+            ->where('api_token', $token)
+            ->first();
     }
 
     public function attemptIdentity(array $credentials)
@@ -80,6 +93,24 @@ class User extends Model implements IdentityInterface
         $user->save();
 
         return $user;
+    }
+
+    public function issueApiToken(): string
+    {
+        do {
+            $token = bin2hex(random_bytes(32));
+        } while (self::query()->where('api_token', $token)->exists());
+
+        $this->api_token = $token;
+        $this->save();
+
+        return $token;
+    }
+
+    public function revokeApiToken(): void
+    {
+        $this->api_token = null;
+        $this->save();
     }
 
     public function roleRelation()

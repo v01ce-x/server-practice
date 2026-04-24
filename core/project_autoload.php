@@ -8,6 +8,7 @@ spl_autoload_register(static function (string $class): void {
         'Controller\\' => dirname(__DIR__) . '/app/Controller/',
         'Model\\' => dirname(__DIR__) . '/app/Model/',
         'Middlewares\\' => dirname(__DIR__) . '/app/Middlewares/',
+        'Providers\\' => dirname(__DIR__) . '/app/Providers/',
     ];
 
     foreach ($prefixes as $prefix => $baseDir) {

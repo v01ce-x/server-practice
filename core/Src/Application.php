@@ -15,6 +15,8 @@ use Src\Auth\Auth;
 class Application
 {
     private Settings $settings;
+    private array $providers = [];
+    private array $binds = [];
     private Route $route;
     private Capsule $dbManager;
     private Auth $auth;
@@ -31,13 +33,53 @@ class Application
         $this->auth = new $this->settings->app['auth'];
 
         //Настройка для работы с базой данных
-        $this->dbRun();
-        $this->ensureDomainSchema();
-        if ($this->shouldAutoSetupDomain()) {
-            $this->seedDomain();
+        try {
+            $this->dbRun();
+            $this->ensureDomainSchema();
+            if ($this->shouldAutoSetupDomain()) {
+                $this->seedDomain();
+            }
+        } catch (\Throwable $exception) {
+            if (!$this->canBootWithoutDatabase()) {
+                throw $exception;
+            }
         }
         //Инициализация класса пользователя на основе настроек приложения
         $this->auth::init(new $this->settings->app['identity']);
+        $providers = $this->settings->app['providers'] ?? [];
+        $this->addProviders(is_array($providers) ? $providers : []);
+        $this->registerProviders();
+        $this->bootProviders();
+    }
+
+    //Заполнения списка провайдеров из массива
+    public function addProviders(array $providers): void
+    {
+        foreach ($providers as $key => $class) {
+            $this->providers[$key] = new $class($this);
+        }
+    }
+
+    //Запуск методов register() у всех провайдеров
+    private function registerProviders(): void
+    {
+        foreach ($this->providers as $provider) {
+            $provider->register();
+        }
+    }
+
+    //Запуск методов bootProviders() у всех провайдеров
+    private function bootProviders(): void
+    {
+        foreach ($this->providers as $provider) {
+            $provider->boot();
+        }
+    }
+
+    //Публичный метод для добавления данных в приложение
+    public function bind(string $key, $value): void
+    {
+        $this->binds[$key] = $value;
     }
 
     public function __get($key)
@@ -50,6 +92,11 @@ class Application
             case 'auth':
                 return $this->auth;
         }
+
+        if (array_key_exists($key, $this->binds)) {
+            return $this->binds[$key];
+        }
+
         throw new Error('Accessing a non-existent property');
     }
 
@@ -101,6 +148,22 @@ class Application
         return filter_var($value, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE) ?? false;
     }
 
+    private function canBootWithoutDatabase(): bool
+    {
+        $uri = rawurldecode((string)($_SERVER['REQUEST_URI'] ?? '/'));
+
+        if (($queryPos = strpos($uri, '?')) !== false) {
+            $uri = substr($uri, 0, $queryPos);
+        }
+
+        $rootPath = $this->settings->getRootPath();
+        if ($rootPath !== '' && str_starts_with($uri, $rootPath)) {
+            $uri = substr($uri, strlen($rootPath)) ?: '/';
+        }
+
+        return $uri === '/api' || $uri === '/api/' || $uri === '/api/echo';
+    }
+
     private function ensureDomainSchema(): void
     {
         $schema = $this->dbManager->schema();
@@ -118,6 +181,7 @@ class Application
                 $table->string('login')->unique();
                 $table->string('password');
                 $table->string('avatar_path')->nullable();
+                $table->string('api_token', 80)->nullable()->unique();
                 $table->unsignedBigInteger('role_id')->nullable();
 
                 $table->foreign('role_id')->references('id')->on('roles')->nullOnDelete();
@@ -125,6 +189,12 @@ class Application
         } elseif (!$schema->hasColumn('admins', 'avatar_path')) {
             $schema->table('admins', function (Blueprint $table) {
                 $table->string('avatar_path')->nullable()->after('password');
+            });
+        }
+
+        if ($schema->hasTable('admins') && !$schema->hasColumn('admins', 'api_token')) {
+            $schema->table('admins', function (Blueprint $table) {
+                $table->string('api_token', 80)->nullable()->unique();
             });
         }
 

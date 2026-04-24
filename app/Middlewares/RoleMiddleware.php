@@ -6,12 +6,19 @@ use Model\User;
 use Src\Auth\Auth;
 use Src\Request;
 use Src\Session;
+use Src\View;
 
 class RoleMiddleware
 {
     public function handle(Request $request, ?string $roles = null): void
     {
         if (!Auth::check()) {
+            if ($request->isApi()) {
+                (new View())->toJSON([
+                    'message' => 'Требуется аутентификация по Bearer token.',
+                ], 401);
+            }
+
             app()->route->redirect('/login');
         }
 
@@ -21,6 +28,12 @@ class RoleMiddleware
 
         if ($allowedRoles === [] || in_array($user->role, $allowedRoles, true)) {
             return;
+        }
+
+        if ($request->isApi()) {
+            (new View())->toJSON([
+                'message' => 'Недостаточно прав для выполнения API-запроса.',
+            ], 403);
         }
 
         Session::flash('Недостаточно прав для доступа к выбранному разделу.', 'error');

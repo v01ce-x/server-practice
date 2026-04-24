@@ -21,6 +21,31 @@ class Settings
         throw new Error('Accessing a non-existent property');
     }
 
+    public function getRoutePath(): string
+    {
+        $routes = trim((string)($this->path['routes'] ?? ''), '/');
+        return $routes !== '' ? '/' . $routes : '';
+    }
+
+    public function getAuthClassName(): string
+    {
+        return $this->app['auth'] ?? '';
+    }
+
+    public function getIdentityClassName(): string
+    {
+        return $this->app['identity'] ?? '';
+    }
+
+    public function removeAppMiddleware(string $key): void
+    {
+        if (!isset($this->_settings['app']['routeAppMiddleware']) || !is_array($this->_settings['app']['routeAppMiddleware'])) {
+            return;
+        }
+
+        unset($this->_settings['app']['routeAppMiddleware'][$key]);
+    }
+
     public function getRootPath(): string
     {
         $root = trim($this->path['root'] ?? '', '/');
@@ -33,7 +58,8 @@ class Settings
         return $views !== '' ? '/' . $views : '';
     }
 
-    public function getDbSetting(): array {
+    public function getDbSetting(): array
+    {
         return $this->db ?? [];
     }
 }

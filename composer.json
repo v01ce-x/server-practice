@@ -22,14 +22,16 @@
         "illuminate/database": "^9.0",
         "illuminate/events": "^9.0",
         "nikic/fast-route": "^1.3",
-        "vo1ce-x/collection": "dev-main"
+        "vo1ce-x/collection": "dev-main",
+      "ext-pdo": "*"
     },
     "autoload": {
         "psr-4": {
             "Src\\": "core/Src/",
             "Controller\\": "app/Controller/",
             "Model\\": "app/Model/",
-            "Middlewares\\": "app/Middlewares/"
+            "Middlewares\\": "app/Middlewares/",
+            "Providers\\": "app/Providers/"
         }
     },
     "config": {

@@ -22,6 +22,8 @@ if (!function_exists('getConfigs')) {
     }
 }
 
+require_once __DIR__ . '/../vendor/autoload.php';
+
 $app = new Src\Application(new Src\Settings(getConfigs()));
 
 if (!function_exists('app')) {
@@ -59,7 +61,5 @@ if (!function_exists('csrf_field')) {
         return Csrf::field();
     }
 }
-
-require_once __DIR__ . '/../routes/web.php';
 
 return $app;

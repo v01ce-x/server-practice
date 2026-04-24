@@ -36,7 +36,11 @@ class Middleware
     public function runMiddlewares(string $httpMethod, string $uri): Request
     {
         $request = new Request();
-        Csrf::validateRequest($request);
+
+        if (!$this->shouldSkipCsrf($uri)) {
+            Csrf::validateRequest($request);
+        }
+
         //Получаем список всех разрешенных классов middlewares из настроек приложения
         $routeMiddleware = app()->settings->app['routeMiddleware'];
 
@@ -55,5 +59,10 @@ class Middleware
     {
         $dispatcherMiddleware = new Dispatcher($this->middlewareCollector->getData());
         return $dispatcherMiddleware->dispatch($httpMethod, $uri)[1] ?? [];
+    }
+
+    private function shouldSkipCsrf(string $uri): bool
+    {
+        return $uri === '/api' || $uri === '/api/' || str_starts_with($uri, '/api/');
     }
 }

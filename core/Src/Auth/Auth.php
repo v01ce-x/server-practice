@@ -9,11 +9,15 @@ class Auth
 {
     //Свойство для хранения любого класса, реализующего интерфейс IdentityInterface
     private static IdentityInterface $user;
+    private static $resolvedUser = null;
+    private static bool $resolved = false;
 
     //Инициализация класса пользователя
     public static function init(IdentityInterface $user): void
     {
         self::$user = $user;
+        self::$resolvedUser = null;
+        self::$resolved = false;
 
         $currentUser = self::user();
         if ($currentUser) {
@@ -29,6 +33,8 @@ class Auth
         Session::regenerate();
         Csrf::refresh();
         self::$user = $user;
+        self::$resolvedUser = $user;
+        self::$resolved = true;
         Session::set('id', self::$user->getId());
     }
 
@@ -49,21 +55,54 @@ class Auth
     //Возврат текущего аутентифицированного пользователя
     public static function user()
     {
+        if (self::$resolved) {
+            return self::$resolvedUser;
+        }
+
+        self::$resolved = true;
+
         $id = Session::get('id');
-        if (empty($id)) {
+        if (!empty($id)) {
+            $user = self::$user->findIdentity((int)$id);
+            if ($user) {
+                self::$resolvedUser = $user;
+                return self::$resolvedUser;
+            }
+
+            Session::clear('id');
+        }
+
+        $token = self::bearerToken();
+        if ($token === null || !method_exists(self::$user, 'findIdentityByToken')) {
             return null;
         }
 
-        return self::$user->findIdentity((int)$id);
+        self::$resolvedUser = self::$user->findIdentityByToken($token);
+
+        return self::$resolvedUser;
     }
 
     //Проверка является ли текущий пользователь аутентифицированным
     public static function check(): bool
     {
-        if (self::user()) {
-            return true;
+        return self::user() !== null;
+    }
+
+    public static function attemptApi(array $credentials): ?string
+    {
+        if (!isset($credentials['login'], $credentials['password'])) {
+            return null;
         }
-        return false;
+
+        $user = self::$user->attemptIdentity($credentials);
+        if (!$user || !method_exists($user, 'issueApiToken')) {
+            return null;
+        }
+
+        self::$resolvedUser = $user;
+        self::$resolved = true;
+
+        return $user->issueApiToken();
     }
 
     //Выход текущего пользователя
@@ -72,7 +111,42 @@ class Auth
         Session::clear('id');
         Session::regenerate();
         Csrf::refresh();
+        self::$resolvedUser = null;
+        self::$resolved = false;
         return true;
+    }
+
+    private static function bearerToken(): ?string
+    {
+        $header = self::header('Authorization');
+        if (!is_string($header)) {
+            return null;
+        }
+
+        if (preg_match('/^\s*Bearer\s+(\S+)\s*$/i', $header, $matches) !== 1) {
+            return null;
+        }
+
+        return trim((string)$matches[1]);
+    }
+
+    private static function header(string $name): ?string
+    {
+        if (function_exists('getallheaders')) {
+            foreach (getallheaders() as $headerName => $value) {
+                if (strcasecmp((string)$headerName, $name) === 0) {
+                    return is_string($value) ? $value : null;
+                }
+            }
+        }
+
+        $serverKey = 'HTTP_' . strtoupper(str_replace('-', '_', $name));
+        $redirectServerKey = 'REDIRECT_' . $serverKey;
+        if ($name === 'Content-Type') {
+            return $_SERVER['CONTENT_TYPE'] ?? $_SERVER[$serverKey] ?? $_SERVER[$redirectServerKey] ?? null;
+        }
+
+        return $_SERVER[$serverKey] ?? $_SERVER[$redirectServerKey] ?? null;
     }
 
 }
