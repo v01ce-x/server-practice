@@ -54,28 +54,33 @@ class View
         $path = $this->getPathToView($view);
         $layoutPath = $this->getPathToMain();
 
-        if (file_exists($layoutPath) && file_exists($path)) {
-
-            //Импортирует переменные из массива в текущую таблицу символов
-            extract($data, EXTR_PREFIX_SAME, '');
-
-            //Включение буферизации вывода
-            ob_start();
-            require $path;
-            //Помещаем буфер в переменную и очищаем его
-            $content = ob_get_clean();
-
-            //Собираем основной шаблон в строку и возвращаем результат
-            ob_start();
-            require $layoutPath;
-            return ob_get_clean();
+        if (!is_file($layoutPath)) {
+            throw new Exception(sprintf(
+                'Error render: layout `%s` not found',
+                $layoutPath
+            ));
         }
 
-        throw new Exception(sprintf(
-            'Error render: layout `%s` or view `%s` not found',
-            $layoutPath,
-            $path
-        ));
+        if (!is_file($path)) {
+            throw new Exception(sprintf(
+                'Error render: view `%s` not found',
+                $path
+            ));
+        }
+
+        //Импортирует переменные из массива в текущую таблицу символов
+        extract($data, EXTR_PREFIX_SAME, '');
+
+        //Включение буферизации вывода
+        ob_start();
+        require $path;
+        //Помещаем буфер в переменную и очищаем его
+        $content = ob_get_clean();
+
+        //Собираем основной шаблон в строку и возвращаем результат
+        ob_start();
+        require $layoutPath;
+        return ob_get_clean();
     }
 
     public function __toString(): string

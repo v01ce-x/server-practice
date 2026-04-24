@@ -2,50 +2,34 @@
 
 namespace Controller;
 
-use Model\Post;
 use Src\Request;
 use Src\View;
-use Model\User;
-use Src\Auth\Auth;
 
 class Site
 {
-    public function index(Request $request): string
+    // Совместимость со старым шаблоном проекта: перенаправляем на актуальные маршруты.
+    public function index(Request $request): void
     {
-        $posts = Post::where('id', $request->id)->get();
-        return (new View())->render('site.post', ['posts' => $posts]);
+        app()->route->redirect('/');
     }
 
-    public function hello(): View|string
+    public function hello(): void
     {
-        return new View('site.hello', ['message' => 'hello working']);
+        app()->route->redirect('/');
     }
 
-    public function signup(Request $request): View|string
+    public function signup(Request $request): void
     {
-        if ($request->method === 'POST' && User::create($request->all())) {
-            app()->route->redirect('/login');
-        }
-        return new View('site.signup');
+        app()->route->redirect('/login');
     }
 
     public function login(Request $request): View|string
     {
-        //Если просто обращение к странице, то отобразить форму
-        if ($request->method === 'GET') {
-            return new View('site.login');
-        }
-        //Если удалось аутентифицировать пользователя, то редирект
-        if (Auth::attempt($request->all())) {
-            app()->route->redirect('/hello');
-        }
-        //Если аутентификация не удалась, то сообщение об ошибке
-        return new View('site.login', ['message' => 'Неправильные логин или пароль']);
+        return (new Auth())->login($request);
     }
 
     public function logout(): void
     {
-        Auth::logout();
-        app()->route->redirect('/login');
+        (new Auth())->logout();
     }
 }
