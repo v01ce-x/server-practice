@@ -7,6 +7,8 @@ ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN apt-get update && apt-get install -y \
     sudo \
     build-essential \
+    libxml2-dev \
+    libonig-dev \
     libzip-dev \
     libpng-dev \
     libjpeg62-turbo-dev \
@@ -22,7 +24,19 @@ RUN apt-get update && apt-get install -y \
     curl
 
 # Install extensions
-RUN docker-php-ext-install pdo_mysql zip exif pcntl mysqli gd
+RUN docker-php-ext-install \
+    dom \
+    mbstring \
+    xml \
+    xmlreader \
+    xmlwriter \
+    simplexml \
+    pdo_mysql \
+    zip \
+    exif \
+    pcntl \
+    mysqli \
+    gd
 
 #Add user
 RUN useradd -m -s /bin/bash -p $(openssl passwd -1 $PASSWORD) $USER

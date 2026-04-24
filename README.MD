@@ -40,3 +40,13 @@
 Для запуска окружения необходимо в директории с `docker-compose.yml` выполнить командц `docker compose up -d`.
 
 Для остановки окружения необходимо в директории с `docker-compose.yml` выполнить командц `docker compose down`.
+
+## 4. Тесты
+
+Для `phpunit` в PHP должны быть доступны расширения `dom`, `json`, `libxml`, `mbstring`, `xml`, `xmlwriter`.
+
+В этом проекте проще всего запускать тесты в контейнере:
+
+`docker compose exec php ./vendor/bin/phpunit`
+
+Если запускаешь тесты локально, установи эти расширения в свой PHP-интерпретатор. Иначе `phpunit` завершится ошибкой проверки platform requirements.
